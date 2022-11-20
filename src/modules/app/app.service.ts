@@ -564,7 +564,7 @@ export class AppService {
 
   async getMarketplace(dto: QueryMarketplaceDTO) {
     const now = Date.now();
-    const match = {};
+    const match = { orderState: OrderState.Created };
     const matchToken = {};
     const pipeline = [];
     let data = [];
@@ -664,10 +664,6 @@ export class AppService {
       },
       { $unwind: { path: '$token', preserveNullAndEmptyArrays: true } },
     ];
-
-    if (Object.keys(match).length > 0) {
-      pipeline.push({ $match: match });
-    }
 
     let paginationFirst = false;
     if (dto.sort in [0, 2, 4, 5, 6] && Object.keys(matchToken).length === 0) {

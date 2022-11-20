@@ -1,4 +1,13 @@
-import { Body, Controller, DefaultValuePipe, Get, ParseIntPipe, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  DefaultValuePipe,
+  Get,
+  ParseArrayPipe,
+  ParseIntPipe,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { AppService } from './app.service';
 import { CommonResponse } from '../utils/interfaces';
 import { QueryLatestBidsDTO } from './dto/QueryLatestBidsDTO';
@@ -62,7 +71,9 @@ export class AppController {
   }
 
   @Post('/checkFirstSale')
-  async checkFirstSale(@Body() uniqueKeys: string[]): Promise<CommonResponse> {
+  async checkFirstSale(
+    @Body(new ParseArrayPipe({ items: String })) uniqueKeys: string[],
+  ): Promise<CommonResponse> {
     return await this.appService.checkFirstSale(uniqueKeys);
   }
 
