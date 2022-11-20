@@ -654,6 +654,7 @@ export class AppService {
       { $limit: dto.pageSize },
     ];
     const unionToken = [
+      { $match: match },
       {
         $lookup: {
           from: 'tokens',
