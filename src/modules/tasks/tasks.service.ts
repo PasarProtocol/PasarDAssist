@@ -894,9 +894,14 @@ export class TasksService {
       ConfigContract[this.configService.get('NETWORK')][Chain.V1].stickerContract
         ? Chain.V1
         : this.chain;
+    const uri =
+      eventInfo.token ===
+      ConfigContract[this.configService.get('NETWORK')][Chain.V1].stickerContract
+        ? 'pasar:json:QmRpAUFErG8bqWfhswsntsTZynrLMobzDP2g98cw3MpeeZ'
+        : eventInfo.uri;
     await this.subTasksService.updateCollection(eventInfo.token, this.chain, {
       owner: eventInfo.owner,
-      uri: eventInfo.uri,
+      uri,
       name: eventInfo.name,
       chain,
       is721,

@@ -81,7 +81,7 @@ export class AppController {
   async listCollectibles(
     @Query('pageNum', ParseIntPipe) pageNum: number = 1,
     @Query('pageSize', ParseIntPipe) pageSize: number = 10,
-    @Query('type') type: string = '',
+    @Query('type', new DefaultValuePipe('')) type: string,
     @Query('after', new DefaultValuePipe(0), ParseIntPipe) after: number,
   ): Promise<CommonResponse> {
     return await this.appService.listCollectibles(pageNum, pageSize, type, after);

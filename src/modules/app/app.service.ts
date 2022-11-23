@@ -395,50 +395,54 @@ export class AppService {
   }
 
   async listCollectibles(pageNum: number, pageSize: number, type: string, after: number) {
-    const match = {};
-    if (type !== '') {
-      match['$or'] = [];
-      const types = type.split(',');
+    const matchOrder = {};
+    const matchToken = {};
+    let selectOrder = false;
+    let selectToken = false;
 
-      if (types.includes('minted')) {
-        match['$or'].push({ order: { $exists: false } });
+    if (type === '') {
+      selectOrder = true;
+      selectToken = true;
+      matchOrder['$or'] = [{ orderState: OrderState.Created }, { orderState: OrderState.Filled }];
+    } else {
+      matchOrder['$or'] = [];
+      if (type.includes('listed')) {
+        selectOrder = true;
+        matchOrder['$or'].push({ orderState: OrderState.Created });
       }
-      if (types.includes('listed')) {
-        match['$or'].push({ 'order.orderState': OrderState.Created });
+      if (type.includes('sold')) {
+        selectOrder = true;
+        matchOrder['$or'].push({ orderState: OrderState.Filled });
       }
-      if (types.includes('sold')) {
-        match['$or'].push({ 'order.orderState': OrderState.Filled });
-      }
-      if (match['$or'].length === 0 || match['$or'].length === 3) {
-        delete match['$or'];
+      if (type.includes('minted')) {
+        selectToken = true;
       }
     }
 
     if (after > 0) {
-      match['createTime'] = { $gt: after };
+      matchOrder['createTime'] = { $gt: after };
+      matchToken['createTime'] = { $gt: after };
     }
 
-    const pipeline = [
+    const pipelineOrder = [
+      { $sort: { createTime: -1 } },
+      { $limit: pageSize * pageNum },
       {
         $lookup: {
-          from: 'orders',
-          let: { uniqueKey: '$uniqueKey' },
-          pipeline: [
-            { $sort: { createTime: -1 } },
-            { $group: { _id: '$uniqueKey', doc: { $first: '$$ROOT' } } },
-            { $replaceRoot: { newRoot: '$doc' } },
-            {
-              $match: {
-                $expr: {
-                  $eq: ['$uniqueKey', '$$uniqueKey'],
-                },
-              },
-            },
-          ],
-          as: 'order',
+          from: 'tokens',
+          localField: 'uniqueKey',
+          foreignField: 'uniqueKey',
+          as: 'token',
         },
       },
-      { $unwind: { path: '$order', preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: '$token', preserveNullAndEmptyArrays: true } },
+    ] as any;
+
+    if (Object.keys(matchOrder).length > 0) {
+      pipelineOrder.unshift({ $match: matchOrder });
+    }
+
+    const pipelineToken = [
       {
         $lookup: {
           from: 'orders',
@@ -447,49 +451,64 @@ export class AppService {
           as: 'orders',
         },
       },
+      { $match: { orders: { $size: 0 } } },
     ] as any;
 
-    if (Object.keys(match).length > 0) {
-      pipeline.push({ $match: match });
+    if (Object.keys(matchToken).length > 0) {
+      pipelineToken.unshift({ $match: matchToken });
     }
 
-    const result = await this.connection
-      .collection('tokens')
-      .aggregate([...pipeline, { $count: 'total' }])
-      .toArray();
+    let countOrder = 0;
+    let countToken = 0;
+    const orders = [];
+    let tokens = [];
 
-    const total = result.length > 0 ? result[0].total : 0;
-    let data = [];
+    if (selectOrder) {
+      countOrder = await this.connection.collection('orders').countDocuments(matchOrder);
+      const result = await this.connection.collection('orders').aggregate(pipelineOrder).toArray();
 
-    if (total > 0) {
-      data = await this.connection
-        .collection('tokens')
-        .aggregate([
-          ...pipeline,
-          { $sort: { 'order.createTime': -1, createTime: -1 } },
-          { $skip: (pageNum - 1) * pageSize },
-          { $limit: pageSize },
-        ])
-        .toArray();
-
-      const collections = JSON.parse(await this.cacheManager.get(Constants.CACHE_KEY_COLLECTIONS));
-
-      for (const item of data) {
-        let primarySale = true;
-        for (const order of item.orders) {
-          if (order.orderState === OrderState.Filled) {
-            primarySale = false;
-            break;
-          }
+      for (const item of result) {
+        if (item.token) {
+          const token = item.token;
+          delete item.token;
+          const order = item;
+          orders.push({ ...token, order });
         }
-        item.primarySale = primarySale;
-        item.orders = undefined;
-
-        item.collectionName = collections[`${item.chain}-${item.contract}`].name;
       }
     }
 
-    return { status: HttpStatus.OK, message: Constants.MSG_SUCCESS, data: { data, total } };
+    if (selectToken) {
+      const count = await this.connection
+        .collection('tokens')
+        .aggregate([...pipelineToken, { $count: 'total' }])
+        .toArray();
+      countToken = count.length > 0 ? count[0].total : 0;
+      tokens = await this.connection
+        .collection('tokens')
+        .aggregate([
+          ...pipelineToken,
+          { $sort: { createTime: -1 } },
+          { $limit: pageSize * pageNum },
+        ])
+        .toArray();
+    }
+
+    const data = [...orders, ...tokens]
+      .sort((a, b) => a.createTime - b.createTime)
+      .splice((pageNum - 1) * pageSize, pageSize);
+
+    const collections = JSON.parse(await this.cacheManager.get(Constants.CACHE_KEY_COLLECTIONS));
+
+    for (const item of data) {
+      item.collectionName =
+        collections[`${item.chain}-${item.contract ? item.contract : item.baseToken}`].name;
+    }
+
+    return {
+      status: HttpStatus.OK,
+      message: Constants.MSG_SUCCESS,
+      data: { data, total: countToken + countOrder },
+    };
   }
 
   async listCollections(
