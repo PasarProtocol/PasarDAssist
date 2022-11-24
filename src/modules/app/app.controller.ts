@@ -407,4 +407,9 @@ export class AppController {
   ): Promise<CommonResponse> {
     return await this.appService.getV1MarketNFTByWalletAddr(walletAddr);
   }
+
+  @Get('/getQuotedTokensRate')
+  async getQuotedTokensRate(): Promise<CommonResponse> {
+    return await this.appService.getQuotedTokensRate();
+  }
 }

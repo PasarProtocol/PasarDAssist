@@ -2368,4 +2368,9 @@ export class AppService {
 
     return { status: HttpStatus.OK, message: Constants.MSG_SUCCESS, data };
   }
+
+  async getQuotedTokensRate() {
+    const data = await this.connection.collection('tokens_rates').find({}).toArray();
+    return { status: HttpStatus.OK, message: Constants.MSG_SUCCESS, data };
+  }
 }

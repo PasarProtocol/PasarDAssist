@@ -3,6 +3,7 @@ import { Chain } from '../modules/utils/enums';
 export const ConfigTokens = {
   mainnet: {
     [Chain.ELA]: {
+      ELA: '0x0000000000000000000000000000000000000000',
       DIA: '0x2C8010Ae4121212F836032973919E8AeC9AEaEE5',
       WELA: '0x517E9e5d46C1EA8aB6f78677d6114Ef47F71f6c4',
       GLIDE: '0xd39eC832FF1CaaFAb2729c76dDeac967ABcA8F27',
@@ -15,6 +16,7 @@ export const ConfigTokens = {
 
   testnet: {
     [Chain.ELA]: {
+      ELA: '0x0000000000000000000000000000000000000000',
       DIA: '0x85946E4b6AB7C5c5C60A7b31415A52C0647E3272',
       WELA: '0x517E9e5d46C1EA8aB6f78677d6114Ef47F71f6c4',
       GLIDE: '0xd39eC832FF1CaaFAb2729c76dDeac967ABcA8F27',
