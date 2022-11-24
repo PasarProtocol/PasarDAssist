@@ -12,12 +12,31 @@ export class TokenDataConsumer {
 
   @Process('update-token-owner')
   async updateOrder(job: Job<{ chain: Chain; contract: string; tokenId: string; to: string }>) {
-    this.logger.log(`Processing job ['update-token-owner'] data: ${JSON.stringify(job.data)}`);
+    this.logger.log(
+      `Processing queues job ['update-token-owner'] data: ${JSON.stringify(job.data)}`,
+    );
     await this.subTasksService.updateTokenOwner(
       job.data.chain,
       job.data.contract,
       job.data.tokenId,
       job.data.to,
+    );
+
+    return true;
+  }
+
+  @Process('update-token-timestamp')
+  async updateTokenTimestamp(
+    job: Job<{ chain: Chain; contract: string; tokenId: string; timestamp: number }>,
+  ) {
+    this.logger.log(
+      `Processing queues job ['update-token-timestamp'] data: ${JSON.stringify(job.data)}`,
+    );
+    await this.subTasksService.updateTokenTimestamp(
+      job.data.chain,
+      job.data.contract,
+      job.data.tokenId,
+      job.data.timestamp,
     );
 
     return true;

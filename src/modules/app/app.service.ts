@@ -1314,7 +1314,7 @@ export class AppService {
         });
       });
 
-      data.attributes.forEach((item) => {
+      data.attributes?.forEach((item) => {
         item.percentage = attributesCount[item.trait_type][item.value];
       });
     }

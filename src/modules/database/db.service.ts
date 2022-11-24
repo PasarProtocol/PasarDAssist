@@ -80,6 +80,12 @@ export class DbService {
       .updateOne({ chain, contract, tokenId }, { $set: { tokenOwner: to } });
   }
 
+  async updateTokenTimestamp(chain: Chain, contract: string, tokenId: string, updateTime: number) {
+    return await this.connection
+      .collection('tokens')
+      .updateOne({ chain, contract, tokenId }, { $set: { updateTime } });
+  }
+
   async updateCollection(token: string, chain: Chain, collection: UpdateCollectionParams) {
     return await this.connection
       .collection('collections')

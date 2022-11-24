@@ -90,7 +90,8 @@ export class TasksCommonService {
 
   @Cron('0 * * * * *')
   async getELATokenRates() {
-    const tokenList = ConfigTokens[this.configService.get('NETWORK')][Chain.ELA];
+    //glidefinance graphql doesn't supply testnet api
+    const tokenList = ConfigTokens['mainnet'][Chain.ELA];
     const tokens = [];
     const promises = [];
     const data = [];

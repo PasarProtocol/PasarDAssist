@@ -157,6 +157,12 @@ export class TasksService {
           eventInfo.to,
         );
       }
+      await this.subTasksService.updateTokenTimestamp(
+        this.chain,
+        this.stickerContract,
+        eventInfo.tokenId,
+        blockInfo.timestamp,
+      );
     }
   }
 
@@ -899,7 +905,7 @@ export class TasksService {
       ConfigContract[this.configService.get('NETWORK')][Chain.V1].stickerContract
         ? 'pasar:json:QmRpAUFErG8bqWfhswsntsTZynrLMobzDP2g98cw3MpeeZ'
         : eventInfo.uri;
-    await this.subTasksService.updateCollection(eventInfo.token, this.chain, {
+    await this.subTasksService.updateCollection(eventInfo.token, chain, {
       owner: eventInfo.owner,
       uri,
       name: eventInfo.name,
@@ -909,11 +915,11 @@ export class TasksService {
       blockNumber: eventInfo.blockNumber,
     });
 
-    if (!this.subTasksService.checkIsBaseCollection(eventInfo.token, this.chain)) {
-      await this.subTasksService.startupSyncCollection(eventInfo.token, this.chain, is721);
+    if (!this.subTasksService.checkIsBaseCollection(eventInfo.token, chain)) {
+      await this.subTasksService.startupSyncCollection(eventInfo.token, chain, is721);
     }
 
-    await this.subTasksService.updateCachedCollections(this.chain, eventInfo.token, eventInfo.name);
+    await this.subTasksService.updateCachedCollections(chain, eventInfo.token, eventInfo.name);
   }
 
   @Timeout('tokenRoyaltyChanged' + Chain.ELA, 60 * 1000)
