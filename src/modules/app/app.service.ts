@@ -1287,7 +1287,7 @@ export class AppService {
     if (data) {
       const order = await this.connection
         .collection('orders')
-        .find({ chain, tokenId, baseToken: contract })
+        .find({ uniqueKey: data.uniqueKey })
         .sort({ createTime: -1 })
         .limit(1)
         .toArray();
@@ -2377,8 +2377,14 @@ export class AppService {
     return { status: HttpStatus.OK, message: Constants.MSG_SUCCESS, data };
   }
 
-  async getQuotedTokensRate() {
-    const data = await this.connection.collection('tokens_rates').find({}).toArray();
+  async getQuotedTokensRate(chain: Chain | '') {
+    const match = {};
+    if (chain === '') {
+      match['chain'] = { $in: [...Object.values(Chain)] };
+    } else {
+      match['chain'] = chain;
+    }
+    const data = await this.connection.collection('token_rates').find(match).toArray();
     return { status: HttpStatus.OK, message: Constants.MSG_SUCCESS, data };
   }
 }

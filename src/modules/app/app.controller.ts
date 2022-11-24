@@ -414,7 +414,9 @@ export class AppController {
   }
 
   @Get('/getQuotedTokensRate')
-  async getQuotedTokensRate(): Promise<CommonResponse> {
-    return await this.appService.getQuotedTokensRate();
+  async getQuotedTokensRate(
+    @Query('chainType', new DefaultValuePipe('')) chain: Chain | '',
+  ): Promise<CommonResponse> {
+    return await this.appService.getQuotedTokensRate(chain);
   }
 }
