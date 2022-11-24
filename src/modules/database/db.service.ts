@@ -277,4 +277,14 @@ export class DbService {
       .collection('collection_attributes')
       .updateOne({ chain, collection, key, value }, { $inc: { count: 1 } }, { upsert: true });
   }
+
+  async insertTokensPrice(record: any) {
+    return await this.connection.collection('tokens_price').insertOne(record);
+  }
+
+  async removeOldTokenPriceRecords(timestamp: number) {
+    return await this.connection
+      .collection('tokens_price')
+      .deleteMany({ timestamp: { $lt: timestamp } });
+  }
 }

@@ -36,6 +36,12 @@ export class AppService {
     return { status: HttpStatus.OK, message: Constants.MSG_SUCCESS };
   }
 
+  async getPrice() {
+    return await this.connection
+      .collection('tokens_price')
+      .findOne({}, { sort: { timestamp: -1 } });
+  }
+
   async loadCollectionsInfo() {
     const data = await this.connection.collection('collections').find().toArray();
     const collections = {};
@@ -1291,32 +1297,34 @@ export class AppService {
         data.order = order[0];
       }
 
-      const attributes = await this.connection
-        .collection('collection_attributes')
-        .aggregate([
-          { $match: { chain, collection: contract } },
-          {
-            $group: {
-              _id: '$key',
-              values: { $push: '$value' },
-              counts: { $push: '$count' },
-              total: { $sum: '$count' },
-            },
-          },
-        ])
-        .toArray();
-
-      const attributesCount = {};
-      attributes.forEach((item) => {
-        attributesCount[item._id] = {};
-        item.values.forEach((value, index) => {
-          attributesCount[item._id][value] = item.counts[index] / item.total;
-        });
-      });
-
-      data.attributes?.forEach((item) => {
-        item.percentage = attributesCount[item.trait_type][item.value];
-      });
+      // const attributes = await this.connection
+      //   .collection('collection_attributes')
+      //   .aggregate([
+      //     { $match: { chain, collection: contract } },
+      //     {
+      //       $group: {
+      //         _id: '$key',
+      //         values: { $push: '$value' },
+      //         counts: { $push: '$count' },
+      //         total: { $sum: '$count' },
+      //       },
+      //     },
+      //   ])
+      //   .toArray();
+      //
+      // const attributesCount = {};
+      // attributes.forEach((item) => {
+      //   attributesCount[item._id] = {};
+      //   item.values.forEach((value, index) => {
+      //     attributesCount[item._id][value] = item.counts[index] / item.total;
+      //   });
+      // });
+      //
+      // if (Object.keys(data.attributes).length > 0) {
+      //   for (const item of data.attributes) {
+      //     item.percentage = attributesCount[item.trait_type][item.value];
+      //   }
+      // }
     }
     return { status: HttpStatus.OK, message: Constants.MSG_SUCCESS, data };
   }

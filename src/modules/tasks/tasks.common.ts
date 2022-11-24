@@ -90,8 +90,7 @@ export class TasksCommonService {
 
   @Cron('0 * * * * *')
   async getELATokenRates() {
-    //glidefinance graphql doesn't supply testnet api
-    const tokenList = ConfigTokens['mainnet'][Chain.ELA];
+    const tokenList = ConfigTokens[this.configService.get('NETWORK')][Chain.ELA];
     const tokens = [];
     const promises = [];
     const data = [];
@@ -109,6 +108,8 @@ export class TasksCommonService {
         rate: parseFloat(rates[i].data.data.token.derivedELA),
       };
     }
+
+    this.logger.log('GetELATokenRates: ' + JSON.stringify(data));
 
     await this.dbService.insertTokenRates(data);
   }
@@ -143,6 +144,69 @@ export class TasksCommonService {
         dia,
       });
     }
+  }
+
+  @Cron('0 */2 * * * *')
+  async getTokenPrice() {
+    const cmcKeyStr = this.configService.get('CMC_KEY');
+    if (!cmcKeyStr) {
+      return;
+    }
+
+    const cmcKeys = cmcKeyStr.split(',');
+    const tokens1 = {
+      BTC: 1,
+      BNB: 1839,
+      HT: 2502,
+      AVAX: 5805,
+      ETH: 1027,
+      FTM: 3513,
+      MATIC: 3890,
+      CRO: 3635,
+      KAVA: 4846,
+    };
+    const tokens2 = {
+      FSN: 2530,
+      ELA: 2492,
+      TLOS: 4660,
+      FUSE: 5634,
+      HOO: 7543,
+      xDAI: 8635,
+      IOTX: 2777,
+    };
+
+    const x = Math.floor(Math.random() * cmcKeys.length);
+    const headers = { 'Content-Type': 'application/json', 'X-CMC_PRO_API_KEY': cmcKeys[x] };
+    const res = await fetch(
+      'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?limit=110',
+      { method: 'get', headers },
+    );
+    const result = await res.json();
+
+    const record = { timestamp: Date.parse(result.status.timestamp) };
+    result.data.forEach((item) => {
+      if (tokens1[item.symbol] === item.id) {
+        record[item.symbol] = item.quote.USD.price;
+      }
+    });
+
+    for (const i in tokens2) {
+      const resOther = await fetch(
+        `https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?limit=1&convert_id=${tokens2[i]}`,
+        { method: 'get', headers },
+      );
+      const resultOther = await resOther.json();
+
+      if (resultOther.data[0].id === 1) {
+        const priceAtBTC = resultOther.data[0].quote[tokens2[i]].price;
+        record[i] = record['BTC'] / priceAtBTC;
+      } else {
+        this.logger.error(`[Get CMC PRICE] the base coin changed`);
+      }
+    }
+
+    await this.dbService.insertTokensPrice(record);
+    await this.dbService.removeOldTokenPriceRecords(record.timestamp - 30 * 24 * 60 * 60 * 1000);
   }
 
   @Timeout('userCollection', 0)
