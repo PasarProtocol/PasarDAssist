@@ -67,9 +67,9 @@ export const ConfigContract = {
       wsUrl: 'wss://api-testnet.elastos.io/eth-ws',
       rpcUrl: 'https://api-testnet.elastos.io/eth',
 
-      pasarContract: '0x6a02E1942A6201C47BBd3246fF2b044a2536aB43',
-      stickerContract: '0x3748c352cF8B3e8c6CF6800F315072a2C1fD3F82',
-      registerContract: '0x26CB562A77eB0610D3d1e6Fc5e856B5bcc93Fb8b',
+      pasarContract: '0x19088c509C390F996802B90bdc4bFe6dc3F5AAA7',
+      stickerContract: '0x32496388d7c0CDdbF4e12BDc84D39B9E42ee4CB0',
+      registerContract: '0x2b304ffC302b402785294629674A8C2b64cEF897',
       pasarMiningContract: '0xB27CC87EaF372F78E3Ca4da38b013E154e7247e0',
 
       pasarContractDeploy: 12311847,
