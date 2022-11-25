@@ -89,7 +89,7 @@ export class TasksCommonService {
   }
 
   @Cron('0 * * * * *')
-  async getELATokenRates() {
+  async getPlatformTokenPrice() {
     const tokenList = ConfigTokens[this.configService.get('NETWORK')][Chain.ELA];
     const tokens = [];
     const promises = [];
@@ -97,19 +97,20 @@ export class TasksCommonService {
     for (const x in tokenList) {
       const token = tokenList[x].toLowerCase();
       tokens.push(token);
-      promises.push(this.subTasksService.getTokenRate(token));
+      promises.push(this.subTasksService.getELATokenRate(token));
     }
 
     const rates = await Promise.all(promises);
+
     for (let i = 0; i < rates.length; i++) {
+      const rate = parseFloat(rates[i].data.data.token.derivedELA);
       data[i] = {
         chain: Chain.ELA,
         token: tokens[i],
-        rate: parseFloat(rates[i].data.data.token.derivedELA),
+        rate,
+        price: rate * parseFloat(rates[i].data.data.bundle.elaPrice),
       };
     }
-
-    this.logger.log('GetELATokenRates: ' + JSON.stringify(data));
 
     await this.dbService.insertTokenRates(data);
   }

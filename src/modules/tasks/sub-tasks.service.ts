@@ -332,7 +332,7 @@ export class SubTasksService {
     return null;
   }
 
-  async getTokenRate(token: string) {
+  async getELATokenRate(token: string) {
     const blockNumber = await this.web3Service.web3RPC[Chain.ELA].eth.getBlockNumber();
     const graphQLParams = {
       query: `query tokenPriceData { token(id: "${token}", block: {number: ${blockNumber}}) { derivedELA } bundle(id: "1", block: {number: ${blockNumber}}) { elaPrice } }`,
