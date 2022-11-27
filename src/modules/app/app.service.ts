@@ -500,14 +500,18 @@ export class AppService {
     }
 
     const data = [...orders, ...tokens]
-      .sort((a, b) => a.createTime - b.createTime)
+      .sort((a, b) => b.createTime - a.createTime)
       .splice((pageNum - 1) * pageSize, pageSize);
 
     const collections = JSON.parse(await this.cacheManager.get(Constants.CACHE_KEY_COLLECTIONS));
 
     for (const item of data) {
       item.collectionName =
-        collections[`${item.chain}-${item.contract ? item.contract : item.baseToken}`].name;
+        collections[
+          `${item.token?.chain ? item.token?.chain : item.chain}-${
+            item.contract ? item.contract : item.baseToken
+          }`
+        ].name;
     }
 
     return {
@@ -611,7 +615,8 @@ export class AppService {
     }
 
     if (dto.collection && dto.collection.length > 0) {
-      match['baseToken'] = { $in: dto.collection };
+      pipeline.push({ $addFields: { collection: { $concat: ['$chain', '-', '$baseToken'] } } });
+      match['collection'] = { $in: dto.collection };
     }
 
     if (dto.token && dto.token.length > 0) {
