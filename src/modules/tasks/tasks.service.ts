@@ -1005,7 +1005,12 @@ export class TasksService {
     });
 
     await collectionEvent.save();
-    await this.subTasksService.updateCollection(eventInfo.token, this.chain, {
+
+    const chain =
+      eventInfo.token === ConfigContract[this.network][Chain.V1].stickerContract
+        ? Chain.V1
+        : this.chain;
+    await this.subTasksService.updateCollection(eventInfo.token, chain, {
       royaltyOwners: eventInfo.royaltyOwners,
       royaltyFees: eventInfo.royaltyFees,
     });
@@ -1097,12 +1102,18 @@ export class TasksService {
     });
 
     await collectionEvent.save();
-    await this.subTasksService.updateCollection(eventInfo.token, this.chain, {
+
+    const chain =
+      eventInfo.token === ConfigContract[this.network][Chain.V1].stickerContract
+        ? Chain.V1
+        : this.chain;
+
+    await this.subTasksService.updateCollection(eventInfo.token, chain, {
       uri: eventInfo.uri,
       name: eventInfo.name,
     });
 
-    await this.subTasksService.updateCachedCollections(this.chain, eventInfo.token, eventInfo.name);
+    await this.subTasksService.updateCachedCollections(chain, eventInfo.token, eventInfo.name);
   }
 
   @Timeout('RewardsDistribution' + Chain.ELA, 60 * 1000)
