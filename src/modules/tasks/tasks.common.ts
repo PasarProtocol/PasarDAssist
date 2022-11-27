@@ -90,7 +90,10 @@ export class TasksCommonService {
 
   @Cron('0 * * * * *')
   async getPlatformTokenPrice() {
-    const tokenList = ConfigTokens[this.configService.get('NETWORK')][Chain.ELA];
+    if (this.configService.get('NETWORK') === 'testnet') {
+      return;
+    }
+    const tokenList = ConfigTokens['mainnet'][Chain.ELA];
     const tokens = [];
     const promises = [];
     const data = [];

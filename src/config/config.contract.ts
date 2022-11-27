@@ -86,11 +86,10 @@ export const ConfigContract = {
 
       pasarContract: '0x2652d10A5e525959F7120b56f2D7a9cD0f6ee087',
       stickerContract: '0xed1978c53731997f4DAfBA47C9b07957Ef6F3961',
+      diaTokenContract: '0x85946E4b6AB7C5c5C60A7b31415A52C0647E3272',
 
       pasarContractDeploy: 7377671,
       stickerContractDeploy: 7377671,
-
-      diaTokenContract: '0x85946E4b6AB7C5c5C60A7b31415A52C0647E3272',
 
       ELAToken: '0x0000000000000000000000000000000000000000',
     },

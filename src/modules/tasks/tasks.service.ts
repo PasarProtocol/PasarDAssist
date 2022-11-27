@@ -25,13 +25,11 @@ export class TasksService {
   private readonly step = 5000;
   private readonly stepInterval = 1000 * 10;
   private readonly chain = Chain.ELA;
+  private readonly network = this.configService.get<string>('NETWORK');
   private readonly rpc = this.web3Service.web3RPC[this.chain];
-  private readonly stickerContract =
-    ConfigContract[this.configService.get('NETWORK')][this.chain].stickerContract;
-  private readonly pasarContract =
-    ConfigContract[this.configService.get('NETWORK')][this.chain].pasarContract;
-  private readonly registerContract =
-    ConfigContract[this.configService.get('NETWORK')][this.chain].registerContract;
+  private readonly stickerContract = ConfigContract[this.network][this.chain].stickerContract;
+  private readonly pasarContract = ConfigContract[this.network][this.chain].pasarContract;
+  private readonly registerContract = ConfigContract[this.network][this.chain].registerContract;
   private readonly stickerContractWS = this.web3Service.stickerContractWS[this.chain];
   private readonly stickerContractRPC = this.web3Service.stickerContractRPC[this.chain];
   private readonly pasarContractWS = this.web3Service.pasarContractWS[this.chain];
@@ -896,13 +894,12 @@ export class TasksService {
     await collectionEvent.save();
 
     const chain =
-      eventInfo.token ===
-      ConfigContract[this.configService.get('NETWORK')][Chain.V1].stickerContract
+      eventInfo.token === ConfigContract[this.network][Chain.V1].stickerContract
         ? Chain.V1
         : this.chain;
     const uri =
-      eventInfo.token ===
-      ConfigContract[this.configService.get('NETWORK')][Chain.V1].stickerContract
+      this.network === 'mainnet' &&
+      eventInfo.token === ConfigContract[this.network][Chain.V1].stickerContract
         ? 'pasar:json:QmRpAUFErG8bqWfhswsntsTZynrLMobzDP2g98cw3MpeeZ'
         : eventInfo.uri;
     await this.subTasksService.updateCollection(eventInfo.token, chain, {

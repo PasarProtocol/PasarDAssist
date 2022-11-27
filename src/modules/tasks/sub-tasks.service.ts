@@ -178,34 +178,6 @@ export class SubTasksService {
         { removeOnComplete: true },
       );
     }
-
-    // if (result.upsertedCount === 1 || result.modifiedCount === 1) {
-    //   const key = `${chain}-${token}`;
-    //   const cachedData = await this.cacheManager.get(Constants.CACHE_KEY_COLLECTIONS);
-    //   if (cachedData) {
-    //     const oldCollections = JSON.parse(cachedData as string);
-    //     for (const id of Object.keys(oldCollections)) {
-    //       if (id === key) {
-    //         oldCollections[id] = { ...oldCollections[id], ...collection };
-    //         await this.cacheManager.set(
-    //           Constants.CACHE_KEY_COLLECTIONS,
-    //           JSON.stringify(oldCollections),
-    //         );
-    //         return;
-    //       }
-    //     }
-    //
-    //     await this.cacheManager.set(
-    //       Constants.CACHE_KEY_COLLECTIONS,
-    //       JSON.stringify({ ...oldCollections, [key]: collection }),
-    //     );
-    //   } else {
-    //     await this.cacheManager.set(
-    //       Constants.CACHE_KEY_COLLECTIONS,
-    //       JSON.stringify({ [key]: collection }),
-    //     );
-    //   }
-    // }
   }
 
   checkIsBaseCollection(token: string, chain: Chain) {
