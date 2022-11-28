@@ -391,10 +391,13 @@ export class AppService {
       );
     }
 
-    const data = await this.connection.collection('tokens').find({ $or: tokenIds }).toArray();
+    const data = [];
+    if (tokenIds.length > 0) {
+      await this.connection.collection('tokens').find({ $or: tokenIds }).toArray();
 
-    for (const item of data) {
-      item.collectionName = collectionNames[item.contract + item.chain];
+      for (const item of data) {
+        item.collectionName = collectionNames[item.contract + item.chain];
+      }
     }
 
     return { status: HttpStatus.OK, message: Constants.MSG_SUCCESS, data };
