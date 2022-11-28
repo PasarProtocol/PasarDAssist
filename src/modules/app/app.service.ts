@@ -363,40 +363,47 @@ export class AppService {
       .collection('collections')
       .find()
       .sort({ dia: -1 })
-      .limit(3)
       .toArray();
 
     const tokenIds = [];
     const collectionNames = {};
-    for (const collection of collections) {
-      const result = await this.connection
-        .collection('orders')
-        .find({
-          baseToken: collection.token,
-          chain: collection.chain,
-          orderState: OrderState.Created,
-        })
-        .sort({ createTime: -1 })
-        .limit(5)
-        .toArray();
+    let data = [];
+    for (let i = 0; i < Math.floor(collections.length / 3); i++) {
+      for (let j = 0; j < 3; j++) {
+        const index = i * 3 + j;
+        const element = collections[index];
+        const result = await this.connection
+          .collection('orders')
+          .find({
+            baseToken: element.token,
+            chain: element.chain,
+            orderState: OrderState.Created,
+          })
+          .sort({ createTime: -1 })
+          .limit(5)
+          .toArray();
 
-      collectionNames[collection.token + collection.chain] = collection.name;
+        collectionNames[element.token + element.chain] = element.name;
 
-      tokenIds.push(
-        ...result.map((item) => ({
-          tokenId: item.tokenId,
-          chain: item.chain,
-          contract: item.baseToken,
-        })),
-      );
-    }
+        tokenIds.push(
+          ...result.map((item) => ({
+            tokenId: item.tokenId,
+            chain: item.chain,
+            contract: item.baseToken,
+          })),
+        );
+      }
 
-    const data = [];
-    if (tokenIds.length > 0) {
-      await this.connection.collection('tokens').find({ $or: tokenIds }).toArray();
+      if (tokenIds.length > 0) {
+        data = await this.connection.collection('tokens').find({ $or: tokenIds }).toArray();
 
-      for (const item of data) {
-        item.collectionName = collectionNames[item.contract + item.chain];
+        for (const item of data) {
+          item.collectionName = collectionNames[item.contract + item.chain];
+        }
+      }
+
+      if (data.length > 3) {
+        break;
       }
     }
 
