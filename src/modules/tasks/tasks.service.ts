@@ -913,7 +913,12 @@ export class TasksService {
     });
 
     if (!this.subTasksService.checkIsBaseCollection(eventInfo.token, chain)) {
-      await this.subTasksService.startupSyncCollection(eventInfo.token, chain, is721);
+      await this.subTasksService.startupSyncCollection(
+        eventInfo.token,
+        chain,
+        is721,
+        this.pasarContract,
+      );
     }
 
     await this.subTasksService.updateCachedCollections(chain, eventInfo.token, eventInfo.name);

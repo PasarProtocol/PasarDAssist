@@ -187,7 +187,7 @@ export class SubTasksService {
     );
   }
 
-  async startupSyncCollection(token: string, chain: Chain, is721: boolean) {
+  async startupSyncCollection(token: string, chain: Chain, is721: boolean, market: string) {
     const ABI = is721 ? TOKEN721_ABI : TOKEN1155_ABI;
     const event = is721 ? 'Transfer' : 'TransferSingle';
     const contractWs = new this.web3Service.web3WS[chain].eth.Contract(ABI, token);
@@ -199,11 +199,17 @@ export class SubTasksService {
       })
       .on('data', async (event) => {
         this.logger.log(`${token} event ${JSON.stringify(event)} received`);
-        await this.dealWithUserCollectionToken(event, token, chain, is721);
+        await this.dealWithUserCollectionToken(event, token, chain, is721, market);
       });
   }
 
-  async dealWithUserCollectionToken(event, contract: string, chain: Chain, is721: boolean) {
+  async dealWithUserCollectionToken(
+    event,
+    contract: string,
+    chain: Chain,
+    is721: boolean,
+    market: string,
+  ) {
     const tokenId = is721 ? event.returnValues._tokenId : event.returnValues._id;
     const contractRPC = new this.web3Service.web3RPC[chain].eth.Contract(
       is721 ? TOKEN721_ABI : TOKEN1155_ABI,
@@ -261,7 +267,9 @@ export class SubTasksService {
 
       await this.dbService.insertToken(tokenInfo);
     } else {
-      await this.dbService.updateTokenOwner(chain, contract, tokenId, event.returnValues._to);
+      if (eventInfo.to !== market) {
+        await this.dbService.updateTokenOwner(chain, contract, tokenId, event.returnValues._to);
+      }
     }
   }
 
