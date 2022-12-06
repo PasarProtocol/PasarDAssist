@@ -12,6 +12,7 @@ import { Chain } from '../utils/enums';
 import { Cache } from 'cache-manager';
 import { Constants } from '../../constants';
 import { OrderState } from './interfaces';
+import { ConfigContract } from "../../config/config.contract";
 
 @Injectable()
 export class TasksCommonService {
@@ -257,6 +258,7 @@ export class TasksCommonService {
                     collection.token,
                     collection.chain,
                     collection.is721,
+                    ConfigContract[this.configService.get('env')][collection.chain].pasarContract,
                   );
                 });
               });
@@ -288,6 +290,7 @@ export class TasksCommonService {
               collection.token,
               collection.chain,
               collection.is721,
+              ConfigContract[this.configService.get('env')][collection.chain].pasarContract,
             );
           });
       }
