@@ -266,7 +266,11 @@ export class SubTasksService {
   }
 
   public async getTokenInfoByUri(uri: string, retryTimes = 0) {
-    if (uri.startsWith('pasar:json') || uri.startsWith('feeds:json')) {
+    if (
+      uri.startsWith('pasar:json') ||
+      uri.startsWith('feeds:json') ||
+      uri.startsWith('hivehub:json')
+    ) {
       return await this.getInfoByIpfsUri(uri);
     }
 

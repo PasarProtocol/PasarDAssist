@@ -142,7 +142,7 @@ export class DbService {
     return await this.connection
       .collection('tokens')
       .find({ notGetDetail: true, retryTimes: { $lt: 5 } })
-      .sort({ createTime: 1 })
+      .sort({ createTime: -1 })
       .limit(10)
       .toArray();
   }
