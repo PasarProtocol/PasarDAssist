@@ -58,10 +58,12 @@ export class TasksCommonService {
           if (tokenInfo) {
             const tokenDetail = {
               name: tokenInfo.name,
-              description: tokenInfo.description,
+              description: tokenInfo.description
+                ? tokenInfo.description
+                : tokenInfo.data.description,
               image: tokenInfo.image ? tokenInfo.image : '',
-              royaltyOwner: collection.royaltyOwner ? collection.royaltyOwners[0] : '',
-              royaltyFee: collection.royaltyFees ? collection.royaltyFees[0] : 0,
+              royaltyOwner: collection.royaltyOwners[0],
+              royaltyFee: collection.royaltyFees[0],
               type: tokenInfo.type ? tokenInfo.type : 'image',
               adult: tokenInfo.adult ? tokenInfo.adult : false,
               version: tokenInfo.version ? tokenInfo.version : 2,
