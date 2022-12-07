@@ -286,6 +286,9 @@ export class TasksCommonService {
             this.logger.error(error);
           })
           .on('data', async (event) => {
+            this.logger.log(
+              `${collection.chain} ${collection.token} ${event} ${JSON.stringify(event)} received`,
+            );
             await this.subTasksService.dealWithUserCollectionToken(
               event,
               collection.token,
