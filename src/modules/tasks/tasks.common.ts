@@ -12,7 +12,7 @@ import { Chain } from '../utils/enums';
 import { Cache } from 'cache-manager';
 import { Constants } from '../../constants';
 import { OrderState } from './interfaces';
-import { ConfigContract } from "../../config/config.contract";
+import { ConfigContract } from '../../config/config.contract';
 
 @Injectable()
 export class TasksCommonService {
@@ -219,7 +219,7 @@ export class TasksCommonService {
   @Timeout('userCollection', 0)
   async startupListenUserCollectionEvent() {
     const registeredCollections = await this.dbService.getRegisteredCollections();
-    registeredCollections.forEach(async (collection) => {
+    for (const collection of registeredCollections) {
       if (!this.subTasksService.checkIsBaseCollection(collection.token, collection.chain)) {
         const nowHeight = await this.web3Service.web3RPC[collection.chain].eth.getBlockNumber();
         const lastHeight = await this.dbService.getUserTokenEventLastHeight(
@@ -258,7 +258,8 @@ export class TasksCommonService {
                     collection.token,
                     collection.chain,
                     collection.is721,
-                    ConfigContract[this.configService.get('env')][collection.chain].pasarContract,
+                    ConfigContract[this.configService.get('NETWORK')][collection.chain]
+                      .pasarContract,
                   );
                 });
               });
@@ -290,10 +291,10 @@ export class TasksCommonService {
               collection.token,
               collection.chain,
               collection.is721,
-              ConfigContract[this.configService.get('env')][collection.chain].pasarContract,
+              ConfigContract[this.configService.get('NETWORK')][collection.chain].pasarContract,
             );
           });
       }
-    });
+    }
   }
 }
