@@ -161,7 +161,7 @@ export class DbService {
       adult: boolean;
       version: number;
       properties: any;
-      creator: string;
+      creator: any;
       data: any;
       attributes: any;
       notGetDetail: boolean;
