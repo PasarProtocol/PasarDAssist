@@ -219,7 +219,7 @@ export class TasksCommonService {
   @Timeout('userCollection', 0)
   async startupListenUserCollectionEvent() {
     const registeredCollections = await this.dbService.getRegisteredCollections();
-    for (const collection of registeredCollections) {
+    registeredCollections.forEach(async (collection) => {
       if (!this.subTasksService.checkIsBaseCollection(collection.token, collection.chain)) {
         const nowHeight = await this.web3Service.web3RPC[collection.chain].eth.getBlockNumber();
         const lastHeight = await this.dbService.getUserTokenEventLastHeight(
@@ -300,6 +300,6 @@ export class TasksCommonService {
             );
           });
       }
-    }
+    });
   }
 }
