@@ -228,7 +228,7 @@ export class TasksCommonService {
         );
 
         const ABI = collection.is721 ? TOKEN721_ABI : TOKEN1155_ABI;
-        const event = collection.is721 ? 'Transfer' : 'TransferSingle';
+        const eventType = collection.is721 ? 'Transfer' : 'TransferSingle';
         const contractWs = new this.web3Service.web3WS[collection.chain].eth.Contract(
           ABI as any,
           collection.token,
@@ -247,7 +247,7 @@ export class TasksCommonService {
             );
 
             contractWs
-              .getPastEvents(event, {
+              .getPastEvents(eventType, {
                 fromBlock,
                 toBlock,
               })
@@ -279,7 +279,7 @@ export class TasksCommonService {
           } Transfer events from [${syncStartBlock + 1}] 💪💪💪 `,
         );
 
-        contractWs.events[event]({
+        contractWs.events[eventType]({
           fromBlock: syncStartBlock + 1,
         })
           .on('error', (error) => {
@@ -287,7 +287,9 @@ export class TasksCommonService {
           })
           .on('data', async (event) => {
             this.logger.log(
-              `${collection.chain} ${collection.token} ${event} ${JSON.stringify(event)} received`,
+              `Received ${collection.chain} ${collection.token} ${eventType} ${JSON.stringify(
+                event,
+              )}`,
             );
             await this.subTasksService.dealWithUserCollectionToken(
               event,
