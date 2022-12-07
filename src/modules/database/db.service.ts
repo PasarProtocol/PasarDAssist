@@ -152,17 +152,19 @@ export class DbService {
     chain: string,
     contract: string,
     tokenDetail: {
-      image: string;
-      creator: string;
-      data: any;
       name: string;
       description: string;
+      image: string;
+      royaltyOwner: string;
+      royaltyFee: number;
       type: string;
       adult: boolean;
       version: number;
-      notGetDetail: boolean;
       properties: any;
+      creator: string;
+      data: any;
       attributes: any;
+      notGetDetail: boolean;
     },
   ) {
     return await this.connection
