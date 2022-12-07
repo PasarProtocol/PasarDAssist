@@ -27,6 +27,7 @@ import { ConfigContract } from '../../config/config.contract';
 import { getTokenEventModel } from '../common/models/TokenEventModel';
 import { Constants } from '../../constants';
 import { Cache } from 'cache-manager';
+import { BigNumber } from 'ethers';
 
 @Injectable()
 export class SubTasksService {
@@ -77,7 +78,7 @@ export class SubTasksService {
     await TokenInfoModel.findOneAndUpdate(
       { uniqueKey: tokenInfo.uniqueKey },
       {
-        tokenIdHex: '0x' + BigInt(tokenInfo.tokenId).toString(16),
+        tokenIdHex: BigNumber.from(tokenInfo.tokenId).toHexString(),
         ...tokenInfo,
         ...ipfsTokenInfo,
         tokenOwner: tokenInfo.royaltyOwner,
@@ -105,7 +106,7 @@ export class SubTasksService {
     const orderInfoDoc = new OrderInfoModel({
       ...orderInfo,
       sellerInfo: ipfsUserInfo,
-      tokenIdHex: '0x' + BigInt(orderInfo.tokenId).toString(16),
+      tokenIdHex: BigNumber.from(orderInfo.tokenId).toHexString(),
     });
 
     await orderInfoDoc.save();
@@ -254,7 +255,7 @@ export class SubTasksService {
         tokenUri,
         tokenSupply: 1,
         tokenOwner: event.returnValues._to,
-        tokenIdHex: '0x' + BigInt(tokenId).toString(16),
+        tokenIdHex: BigNumber.from(tokenId).toHexString(),
         chain,
         contract,
         uniqueKey: `${chain}-${contract}-${tokenId}`,
