@@ -2249,12 +2249,16 @@ export class AppService {
   async checkFirstSale(uniqueKeys: string[]) {
     const match = [];
     uniqueKeys.forEach((uniqueKey) => {
-      const [chain, contract, tokenId] = uniqueKey.split('-');
-      match.push({
-        chain,
-        contract,
-        tokenId,
-      });
+      if (uniqueKey.includes('-')) {
+        const [chain, contract, tokenId] = uniqueKey.split('-');
+        match.push({
+          chain,
+          contract,
+          tokenId,
+        });
+      } else {
+        match.push({ tokenId: uniqueKey });
+      }
     });
 
     const data = await this.connection
