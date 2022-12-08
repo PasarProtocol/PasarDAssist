@@ -3,8 +3,8 @@ import { Chain } from '../modules/utils/enums';
 export const ConfigContract = {
   mainnet: {
     [Chain.ELA]: {
-      wsUrl: 'ws://localhost:20635',
-      rpcUrl: 'http://localhost:20636',
+      wsUrl: 'wss://api.elastos.io/eth-ws',
+      rpcUrl: 'https://api.elastos.io/eth',
 
       pasarContract: '0xaeA699E4dA22986eB6fa2d714F5AC737Fe93a998',
       stickerContract: '0xF63f820F4a0bC6E966D61A4b20d24916713Ebb95',
@@ -20,8 +20,8 @@ export const ConfigContract = {
     },
 
     [Chain.V1]: {
-      wsUrl: 'ws://localhost:20635',
-      rpcUrl: 'http://localhost:20636',
+      wsUrl: 'wss://api.elastos.io/eth-ws',
+      rpcUrl: 'https://api.elastos.io/eth',
 
       pasarContract: '0x02E8AD0687D583e2F6A7e5b82144025f30e26aA0',
       stickerContract: '0x020c7303664bc88ae92cE3D380BF361E03B78B81',
