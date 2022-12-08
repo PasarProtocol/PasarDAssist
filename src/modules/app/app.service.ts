@@ -2247,24 +2247,10 @@ export class AppService {
   }
 
   async checkFirstSale(uniqueKeys: string[]) {
-    const match = [];
-    uniqueKeys.forEach((uniqueKey) => {
-      if (uniqueKey.includes('-')) {
-        const [chain, contract, tokenId] = uniqueKey.split('-');
-        match.push({
-          chain,
-          contract,
-          tokenId,
-        });
-      } else {
-        match.push({ tokenId: uniqueKey });
-      }
-    });
-
-    const data = await this.connection
+    const result = await this.connection
       .collection('tokens')
       .aggregate([
-        { $match: { $or: match } },
+        { $match: { uniqueKey: { $in: uniqueKeys } } },
         {
           $lookup: {
             from: 'orders',
@@ -2285,31 +2271,31 @@ export class AppService {
       ])
       .toArray();
 
-    const result = data.map((item) => {
-      const data = {
+    const data = result.map((item) => {
+      const newItem = {
         chain: item.chain,
         contract: item.contract,
         tokenId: item.tokenId,
         isOnSale: false,
         isFirstSale: true,
       };
+
       if (item.orders.length > 0) {
         if (item.orders[0].orderState === OrderState.Created) {
-          data.isOnSale = true;
+          newItem.isOnSale = true;
         }
 
         item.orders.forEach((order) => {
           if (order.orderState === OrderState.Filled) {
-            data.isFirstSale = false;
-            return;
+            newItem.isFirstSale = false;
           }
         });
       }
 
-      return data;
+      return newItem;
     });
 
-    return { status: HttpStatus.OK, message: Constants.MSG_SUCCESS, data: result };
+    return { status: HttpStatus.OK, message: Constants.MSG_SUCCESS, data };
   }
 
   async getTokensCount() {

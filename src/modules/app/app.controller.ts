@@ -76,9 +76,7 @@ export class AppController {
   }
 
   @Post('/checkFirstSale')
-  async checkFirstSale(
-    @Body(new ParseArrayPipe({ items: String })) uniqueKeys: string[],
-  ): Promise<CommonResponse> {
+  async checkFirstSale(@Body() uniqueKeys: string[]): Promise<CommonResponse> {
     return await this.appService.checkFirstSale(uniqueKeys);
   }
 
