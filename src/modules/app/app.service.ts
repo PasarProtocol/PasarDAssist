@@ -1157,7 +1157,7 @@ export class AppService {
 
     data.forEach((item) => {
       let eventTypeName = '';
-      if (item.eventType) {
+      if (item.order) {
         switch (item.eventType) {
           case OrderEventType.OrderForSale:
             eventTypeName = 'CreateOrderForSale';
