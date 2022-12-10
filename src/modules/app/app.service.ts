@@ -648,9 +648,27 @@ export class AppService {
       match['price'] = priceMatch;
     }
 
-    if (!dto.adult) {
-      matchToken['$or'] = [{ 'token.adult': { $exists: false } }, { 'token.adult': false }];
+    let adultOr;
+    let keywordOr;
+    if (dto.adult) {
+      adultOr = [{ 'token.adult': { $exists: false } }, { 'token.adult': false }];
     }
+
+    if (dto.keyword !== '' && dto.keyword !== undefined) {
+      keywordOr = [
+        { 'token.name': { $regex: dto.keyword, $options: 'i' } },
+        { 'token.description': { $regex: dto.keyword, $options: 'i' } },
+        { 'token.creator.name': { $regex: dto.keyword, $options: 'i' } },
+        { 'token.creator.description': { $regex: dto.keyword, $options: 'i' } },
+      ];
+    }
+
+    if (adultOr !== undefined && keywordOr !== undefined) {
+      matchToken['$and'] = [{ $or: adultOr }, { $or: keywordOr }];
+    } else if (adultOr !== undefined || keywordOr !== undefined) {
+      matchToken['$or'] = adultOr === undefined ? keywordOr : adultOr;
+    }
+
     if (dto.type && dto.type !== 'all') {
       if (dto.type === 'avatar') {
         matchToken['order.type'] = 'avatar';

@@ -11,4 +11,5 @@ export class QueryMarketplaceDTO extends QueryPageDTO {
   minPrice?: number;
   maxPrice?: number;
   type: string;
+  keyword?: string;
 }
