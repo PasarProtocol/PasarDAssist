@@ -650,7 +650,7 @@ export class AppService {
 
     let adultOr;
     let keywordOr;
-    if (dto.adult) {
+    if (!dto.adult) {
       adultOr = [{ 'token.adult': { $exists: false } }, { 'token.adult': false }];
     }
 
