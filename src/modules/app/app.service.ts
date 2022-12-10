@@ -1181,10 +1181,10 @@ export class AppService {
             eventTypeName = 'CreateOrderForSale';
             break;
           case OrderEventType.OrderForAuction:
-            eventTypeName = 'CreateOrderForAuction';
+            eventTypeName = 'OrderForAuction';
             break;
           case OrderEventType.OrderBid:
-            eventTypeName = 'BidForOrder';
+            eventTypeName = 'OrderBid';
             break;
           case OrderEventType.OrderCancelled:
             eventTypeName = 'CancelOrder';
