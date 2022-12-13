@@ -2412,9 +2412,10 @@ export class AppService {
   }
 
   async listFeedsChannel(pageNum: number, pageSize: number, keyword: string) {
-    const match = { type: 'FeedsChannel' };
+    const match = { type: 'FeedsChannel', tokenOwner: { $ne: Constants.BURN_ADDRESS } };
     if (keyword !== '') {
       match['$or'] = [
+        { 'data.cname': { $regex: keyword, $options: 'i' } },
         { name: { $regex: keyword, $options: 'i' } },
         { description: { $regex: keyword, $options: 'i' } },
       ];
