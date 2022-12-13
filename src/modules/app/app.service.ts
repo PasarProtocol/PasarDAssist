@@ -671,9 +671,9 @@ export class AppService {
 
     if (dto.type && dto.type !== 'all') {
       if (dto.type === 'avatar') {
-        matchToken['order.type'] = 'avatar';
+        matchToken['token.type'] = 'avatar';
       } else {
-        matchToken['order.type'] = { $ne: 'avatar' };
+        matchToken['token.type'] = { $ne: 'avatar' };
       }
     }
 
