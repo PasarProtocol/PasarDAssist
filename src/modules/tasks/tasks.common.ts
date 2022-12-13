@@ -173,6 +173,7 @@ export class TasksCommonService {
       KAVA: 4846,
     };
     const tokens2 = {
+      EVMOS: 19899,
       FSN: 2530,
       ELA: 2492,
       TLOS: 4660,
