@@ -30,6 +30,11 @@ export class AppController {
     return await this.appService.getPrice();
   }
 
+  @Get('/price')
+  async getPrice2(): Promise<any> {
+    return await this.appService.getPrice();
+  }
+
   @Get('/getTokenOrderByTokenId')
   async getTokenOrderByTokenId(@Query('tokenId') tokenId: string): Promise<CommonResponse> {
     return await this.appService.getTokenOrderByTokenId(tokenId);
