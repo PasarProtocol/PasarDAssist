@@ -2410,4 +2410,29 @@ export class AppService {
     const data = await this.connection.collection('token_rates').find(match).toArray();
     return { status: HttpStatus.OK, message: Constants.MSG_SUCCESS, data };
   }
+
+  async listFeedsChannel(pageNum: number, pageSize: number, keyword: string) {
+    const match = { type: 'FeedsChannel' };
+    if (keyword !== '') {
+      match['$or'] = [
+        { name: { $regex: keyword, $options: 'i' } },
+        { description: { $regex: keyword, $options: 'i' } },
+      ];
+    }
+
+    const total = await this.connection.collection('tokens').countDocuments(match);
+
+    let data = [];
+    if (total > 0) {
+      data = await this.connection
+        .collection('tokens')
+        .find(match)
+        .sort({ createTime: -1 })
+        .skip((pageNum - 1) * pageSize)
+        .limit(pageSize)
+        .toArray();
+    }
+
+    return { status: HttpStatus.OK, message: Constants.MSG_SUCCESS, data: { total, data } };
+  }
 }

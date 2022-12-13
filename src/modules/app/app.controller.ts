@@ -422,4 +422,13 @@ export class AppController {
   ): Promise<CommonResponse> {
     return await this.appService.getQuotedTokensRate(chain);
   }
+
+  @Get('/listFeedsChannel')
+  async listFeedsChannel(
+    @Query('pageNum', new DefaultValuePipe(1), ParseIntPipe) pageNum: number,
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
+    @Query('keyword', new DefaultValuePipe('')) keyword: string,
+  ): Promise<CommonResponse> {
+    return await this.appService.listFeedsChannel(pageNum, pageSize, keyword);
+  }
 }
