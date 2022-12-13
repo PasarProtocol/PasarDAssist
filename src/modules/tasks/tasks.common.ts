@@ -220,87 +220,94 @@ export class TasksCommonService {
   @Timeout('userCollection', 0)
   async startupListenUserCollectionEvent() {
     const registeredCollections = await this.dbService.getRegisteredCollections();
-    registeredCollections.forEach(async (collection) => {
-      if (!this.subTasksService.checkIsBaseCollection(collection.token, collection.chain)) {
-        const nowHeight = await this.web3Service.web3RPC[collection.chain].eth.getBlockNumber();
-        const lastHeight = await this.dbService.getUserTokenEventLastHeight(
-          collection.chain,
-          collection.token,
-        );
+    registeredCollections.forEach((collection) => {
+      this.startupSyncUserCollection(collection);
 
-        const ABI = collection.is721 ? TOKEN721_ABI : TOKEN1155_ABI;
-        const eventType = collection.is721 ? 'Transfer' : 'TransferSingle';
-        const contractWs = new this.web3Service.web3WS[collection.chain].eth.Contract(
-          ABI as any,
-          collection.token,
-        );
+      if (collection.name === 'Feeds Channel Registry' && collection.chain === Chain.ELA) {
+        this.subTasksService.startupListenUpdateChannelEvent(collection.token, 0);
+      }
+    });
+  }
 
-        let syncStartBlock = lastHeight;
+  async startupSyncUserCollection(collection) {
+    if (!this.subTasksService.checkIsBaseCollection(collection.token, collection.chain)) {
+      const nowHeight = await this.web3Service.web3RPC[collection.chain].eth.getBlockNumber();
+      const lastHeight = await this.dbService.getUserTokenEventLastHeight(
+        collection.chain,
+        collection.token,
+      );
 
-        if (nowHeight - lastHeight > this.step + 1) {
-          syncStartBlock = nowHeight;
+      const ABI = collection.is721 ? TOKEN721_ABI : TOKEN1155_ABI;
+      const eventType = collection.is721 ? 'Transfer' : 'TransferSingle';
+      const contractWs = new this.web3Service.web3WS[collection.chain].eth.Contract(
+        ABI as any,
+        collection.token,
+      );
 
-          let fromBlock = lastHeight + 1;
-          let toBlock = fromBlock + this.step;
-          while (fromBlock <= nowHeight) {
-            this.logger.log(
-              `Sync [${collection.chain}] user Collection ${collection.token} Transfer events from [${fromBlock}] to [${toBlock}]`,
-            );
+      let syncStartBlock = lastHeight;
 
-            contractWs
-              .getPastEvents(eventType, {
-                fromBlock,
-                toBlock,
-              })
-              .then((events) => {
-                events.forEach(async (event) => {
-                  await this.subTasksService.dealWithUserCollectionToken(
-                    event,
-                    collection.token,
-                    collection.chain,
-                    collection.is721,
-                    ConfigContract[this.configService.get('NETWORK')][collection.chain]
-                      .pasarContract,
-                  );
-                });
-              });
-            fromBlock = toBlock + 1;
-            toBlock = fromBlock + this.step > nowHeight ? nowHeight : toBlock + this.step;
-            await Sleep(this.stepInterval);
-          }
+      if (nowHeight - lastHeight > this.step + 1) {
+        syncStartBlock = nowHeight;
 
+        let fromBlock = lastHeight + 1;
+        let toBlock = fromBlock + this.step;
+        while (fromBlock <= nowHeight) {
           this.logger.log(
-            `Sync ${collection.chain} user Collection ${collection.token} Transfer events from [${fromBlock}] to [${toBlock}] ✅☕🚾️`,
+            `Sync [${collection.chain}] user Collection ${collection.token} Transfer events from [${fromBlock}] to [${toBlock}]`,
           );
+
+          contractWs
+            .getPastEvents(eventType, {
+              fromBlock,
+              toBlock,
+            })
+            .then((events) => {
+              events.forEach(async (event) => {
+                await this.subTasksService.dealWithUserCollectionToken(
+                  event,
+                  collection.token,
+                  collection.chain,
+                  collection.is721,
+                  ConfigContract[this.configService.get('NETWORK')][collection.chain].pasarContract,
+                );
+              });
+            });
+          fromBlock = toBlock + 1;
+          toBlock = fromBlock + this.step > nowHeight ? nowHeight : toBlock + this.step;
+          await Sleep(this.stepInterval);
         }
 
         this.logger.log(
-          `Start sync ${collection.chain} user Collection ${
-            collection.token
-          } Transfer events from [${syncStartBlock + 1}] 💪💪💪 `,
+          `Sync ${collection.chain} user Collection ${collection.token} Transfer events from [${fromBlock}] to [${toBlock}] ✅☕🚾️`,
         );
-
-        contractWs.events[eventType]({
-          fromBlock: syncStartBlock + 1,
-        })
-          .on('error', (error) => {
-            this.logger.error(error);
-          })
-          .on('data', async (event) => {
-            this.logger.log(
-              `Received ${collection.chain} ${collection.token} ${eventType} ${JSON.stringify(
-                event,
-              )}`,
-            );
-            await this.subTasksService.dealWithUserCollectionToken(
-              event,
-              collection.token,
-              collection.chain,
-              collection.is721,
-              ConfigContract[this.configService.get('NETWORK')][collection.chain].pasarContract,
-            );
-          });
       }
-    });
+
+      this.logger.log(
+        `Start sync ${collection.chain} user Collection ${collection.token} Transfer events from [${
+          syncStartBlock + 1
+        }] 💪💪💪 `,
+      );
+
+      contractWs.events[eventType]({
+        fromBlock: syncStartBlock + 1,
+      })
+        .on('error', (error) => {
+          this.logger.error(error);
+        })
+        .on('data', async (event) => {
+          this.logger.log(
+            `Received ${collection.chain} ${collection.token} ${eventType} ${JSON.stringify(
+              event,
+            )}`,
+          );
+          await this.subTasksService.dealWithUserCollectionToken(
+            event,
+            collection.token,
+            collection.chain,
+            collection.is721,
+            ConfigContract[this.configService.get('NETWORK')][collection.chain].pasarContract,
+          );
+        });
+    }
   }
 }

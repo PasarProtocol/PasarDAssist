@@ -289,4 +289,16 @@ export class DbService {
       .collection('tokens_price')
       .deleteMany({ timestamp: { $lt: timestamp } });
   }
+
+  async updateFeedsChannel(tokenId: string, tokenUri: string, receiptAddr: string) {
+    return await this.connection.collection('tokens').updateOne(
+      { chain: Chain.ELA, tokenId },
+      {
+        tokenUri,
+        receiptAddr,
+        notGetDetail: true,
+        retryTimes: 0,
+      },
+    );
+  }
 }

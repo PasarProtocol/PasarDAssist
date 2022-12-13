@@ -28,6 +28,8 @@ import { getTokenEventModel } from '../common/models/TokenEventModel';
 import { Constants } from '../../constants';
 import { Cache } from 'cache-manager';
 import { BigNumber } from 'ethers';
+import { ChannelRegistryABI } from '../../contracts/ChannelRegistryABI';
+import { getChannelUpdatedEventModel } from '../common/models/ChannelUpdatedEventModel';
 
 @Injectable()
 export class SubTasksService {
@@ -396,5 +398,45 @@ export class SubTasksService {
       }
       await this.cacheManager.set(Constants.CACHE_KEY_COLLECTIONS, JSON.stringify(collections));
     }
+  }
+
+  startupListenUpdateChannelEvent(token: string, fromBlock: number) {
+    const contractWs = new this.web3Service.web3WS[Chain.ELA].eth.Contract(
+      ChannelRegistryABI as any,
+      token,
+    );
+
+    this.logger.log(
+      `Start sync ela user Collection ${token} ChannelUpdated events from [${fromBlock}] 💪💪💪 `,
+    );
+
+    contractWs.events['ChannelUpdated']({
+      fromBlock,
+    })
+      .on('error', (error) => {
+        this.logger.error(error);
+      })
+      .on('data', async (event) => {
+        const eventInfo = {
+          blockNumber: event.blockNumber,
+          transactionHash: event.transactionHash,
+          tokenId: event.returnValues.tokenId,
+          tokenUri: event.returnValues.tokenURI ?? event.returnValues.newChannelURI,
+          channelEntry: event.returnValues.channelEntry ?? event.returnValues.newChannelEntry,
+          receiptAddr: event.returnValues.receiptAddr,
+        };
+
+        this.logger.log(`Received ela ${token} ChannelUpdated ${JSON.stringify(eventInfo)}`);
+
+        const ChannelUpdatedModel = getChannelUpdatedEventModel(this.connection);
+        const channelUpdatedEvent = new ChannelUpdatedModel(eventInfo);
+        await channelUpdatedEvent.save();
+
+        await this.dbService.updateFeedsChannel(
+          eventInfo.tokenId,
+          eventInfo.tokenUri,
+          eventInfo.receiptAddr,
+        );
+      });
   }
 }
