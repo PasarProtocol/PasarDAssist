@@ -10,9 +10,9 @@ import { ConfigTokens } from '../../config/config.tokens';
 import { ConfigService } from '@nestjs/config';
 import { Chain } from '../utils/enums';
 import { Cache } from 'cache-manager';
-import { Constants } from '../../constants';
-import { OrderState } from './interfaces';
+import { FeedsChannelEventType } from './interfaces';
 import { ConfigContract } from '../../config/config.contract';
+import { ChannelRegistryABI } from '../../contracts/ChannelRegistryABI';
 
 @Injectable()
 export class TasksCommonService {
@@ -224,9 +224,50 @@ export class TasksCommonService {
       this.startupSyncUserCollection(collection);
 
       if (collection.name === 'Feeds Channel Registry' && collection.chain === Chain.ELA) {
-        this.subTasksService.startupListenUpdateChannelEvent(collection.token, 0);
+        this.startupListenChannelEvent(collection.token, FeedsChannelEventType.ChannelRegistered);
+        this.startupListenChannelEvent(collection.token, FeedsChannelEventType.ChannelUpdated);
       }
     });
+  }
+
+  async startupListenChannelEvent(token, eventType: FeedsChannelEventType) {
+    const nowHeight = await this.web3Service.web3RPC[Chain.ELA].eth.getBlockNumber();
+    const lastHeight = await this.dbService.getChannelEventLastHeight(eventType);
+
+    let syncStartBlock = lastHeight;
+
+    if (nowHeight - lastHeight > this.step + 1) {
+      const contractWs = new this.web3Service.web3WS[Chain.ELA].eth.Contract(
+        ChannelRegistryABI as any,
+        token,
+      );
+
+      syncStartBlock = nowHeight;
+
+      let fromBlock = lastHeight + 1;
+      let toBlock = fromBlock + this.step;
+      while (fromBlock <= nowHeight) {
+        this.logger.log(`Sync ${eventType} events from [${fromBlock}] to [${toBlock}]`);
+
+        contractWs
+          .getPastEvents(eventType, {
+            fromBlock,
+            toBlock,
+          })
+          .then((events) => {
+            events.forEach(async (event) => {
+              await this.subTasksService.dealWithChannelEvents(event, eventType);
+            });
+          });
+        fromBlock = toBlock + 1;
+        toBlock = fromBlock + this.step > nowHeight ? nowHeight : toBlock + this.step;
+        await Sleep(this.stepInterval);
+      }
+
+      this.logger.log(`Sync ${eventType} events from [${fromBlock}] to [${toBlock}] ✅☕🚾️`);
+
+      this.subTasksService.startupListenChannelEvent(token, eventType, syncStartBlock + 1);
+    }
   }
 
   async startupSyncUserCollection(collection) {

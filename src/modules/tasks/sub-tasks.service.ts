@@ -3,6 +3,7 @@ import {
   ContractOrderInfo,
   ContractTokenInfo,
   ContractUserInfo,
+  FeedsChannelEventType,
   IncomeType,
   IPFSCollectionInfo,
   IPFSTokenInfo,
@@ -29,7 +30,7 @@ import { Constants } from '../../constants';
 import { Cache } from 'cache-manager';
 import { BigNumber } from 'ethers';
 import { ChannelRegistryABI } from '../../contracts/ChannelRegistryABI';
-import { getChannelUpdatedEventModel } from '../common/models/ChannelUpdatedEventModel';
+import { getChannelEventModel } from '../common/models/ChannelEventModel';
 
 @Injectable()
 export class SubTasksService {
@@ -400,43 +401,46 @@ export class SubTasksService {
     }
   }
 
-  startupListenUpdateChannelEvent(token: string, fromBlock: number) {
+  startupListenChannelEvent(token: string, eventType: FeedsChannelEventType, fromBlock: number) {
     const contractWs = new this.web3Service.web3WS[Chain.ELA].eth.Contract(
       ChannelRegistryABI as any,
       token,
     );
 
-    this.logger.log(
-      `Start sync ela user Collection ${token} ChannelUpdated events from [${fromBlock}] 💪💪💪 `,
-    );
+    this.logger.log(`Start sync ${eventType} events from [${fromBlock}] 💪💪💪 `);
 
-    contractWs.events['ChannelUpdated']({
+    contractWs.events[eventType]({
       fromBlock,
     })
       .on('error', (error) => {
         this.logger.error(error);
       })
       .on('data', async (event) => {
-        const eventInfo = {
-          blockNumber: event.blockNumber,
-          transactionHash: event.transactionHash,
-          tokenId: event.returnValues.tokenId,
-          tokenUri: event.returnValues.tokenURI ?? event.returnValues.newChannelURI,
-          channelEntry: event.returnValues.channelEntry ?? event.returnValues.newChannelEntry,
-          receiptAddr: event.returnValues.receiptAddr,
-        };
-
-        this.logger.log(`Received ela ${token} ChannelUpdated ${JSON.stringify(eventInfo)}`);
-
-        const ChannelUpdatedModel = getChannelUpdatedEventModel(this.connection);
-        const channelUpdatedEvent = new ChannelUpdatedModel(eventInfo);
-        await channelUpdatedEvent.save();
-
-        await this.dbService.updateFeedsChannel(
-          eventInfo.tokenId,
-          eventInfo.tokenUri,
-          eventInfo.receiptAddr,
-        );
+        await this.dealWithChannelEvents(event, eventType);
       });
+  }
+
+  async dealWithChannelEvents(event, eventType: FeedsChannelEventType) {
+    const eventInfo = {
+      blockNumber: event.blockNumber,
+      transactionHash: event.transactionHash,
+      tokenId: event.returnValues.tokenId,
+      tokenUri: event.returnValues.tokenURI ?? event.returnValues.newChannelURI,
+      channelEntry: event.returnValues.channelEntry ?? event.returnValues.newChannelEntry,
+      receiptAddr: event.returnValues.receiptAddr,
+      eventType,
+    };
+
+    this.logger.log(`Received ${eventType} ${JSON.stringify(eventInfo)}`);
+
+    const ChannelEventModel = getChannelEventModel(this.connection);
+    const channelEvent = new ChannelEventModel(eventInfo);
+    await channelEvent.save();
+
+    await this.dbService.updateFeedsChannel(
+      eventInfo.tokenId,
+      eventInfo.tokenUri,
+      eventInfo.receiptAddr,
+    );
   }
 }

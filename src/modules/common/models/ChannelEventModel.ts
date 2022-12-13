@@ -1,6 +1,6 @@
 import mongoose, { Connection, Model } from 'mongoose';
 
-export const ChannelUpdatedEventSchema = new mongoose.Schema(
+export const ChannelEventSchema = new mongoose.Schema(
   {
     blockNumber: Number,
     transactionHash: String,
@@ -8,10 +8,11 @@ export const ChannelUpdatedEventSchema = new mongoose.Schema(
     tokenUri: String,
     channelEntry: String,
     receiptAddr: String,
+    eventType: String,
   },
   { versionKey: false },
 );
 
-export function getChannelUpdatedEventModel(connection: Connection): Model<any> {
-  return connection.model('channel_updated_events', ChannelUpdatedEventSchema);
+export function getChannelEventModel(connection: Connection): Model<any> {
+  return connection.model('channel_events', ChannelEventSchema);
 }

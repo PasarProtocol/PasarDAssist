@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import {
   CollectionEventType,
   ContractUserInfo,
+  FeedsChannelEventType,
   IncomeType,
   OrderEventType,
   OrderState,
@@ -65,6 +66,21 @@ export class DbService {
       return results[0].blockNumber;
     } else {
       return parseInt(ConfigContract[this.configService.get('NETWORK')][chain].pasarContractDeploy);
+    }
+  }
+
+  async getChannelEventLastHeight(eventType: FeedsChannelEventType) {
+    const results = await this.connection
+      .collection('channel_events')
+      .find({ eventType })
+      .sort({ blockNumber: -1 })
+      .limit(1)
+      .toArray();
+
+    if (results.length > 0) {
+      return results[0].blockNumber;
+    } else {
+      return 0;
     }
   }
 

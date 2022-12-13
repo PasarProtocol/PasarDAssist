@@ -6,7 +6,13 @@ import { Connection } from 'mongoose';
 import { getTokenEventModel } from '../common/models/TokenEventModel';
 import { Constants } from '../../constants';
 import { SubTasksService } from './sub-tasks.service';
-import { CollectionEventType, ContractTokenInfo, OrderEventType, OrderState } from './interfaces';
+import {
+  CollectionEventType,
+  ContractTokenInfo,
+  FeedsChannelEventType,
+  OrderEventType,
+  OrderState,
+} from './interfaces';
 import { ConfigService } from '@nestjs/config';
 import { getOrderEventModel } from '../common/models/OrderEventModel';
 import { Sleep } from '../utils/utils.service';
@@ -918,6 +924,19 @@ export class TasksService {
         chain,
         is721,
         this.pasarContract,
+      );
+    }
+
+    if (eventInfo.name === 'Feeds Channel Registry') {
+      await this.subTasksService.startupListenChannelEvent(
+        eventInfo.token,
+        FeedsChannelEventType.ChannelRegistered,
+        0,
+      );
+      await this.subTasksService.startupListenChannelEvent(
+        eventInfo.token,
+        FeedsChannelEventType.ChannelUpdated,
+        0,
       );
     }
 
