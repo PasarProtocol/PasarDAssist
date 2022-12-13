@@ -6,7 +6,7 @@ import { AppService } from './modules/app/app.service';
 async function bootstrap() {
   const app = await NestFactory.create(MainModule);
 
-  app.setGlobalPrefix('/api/v1');
+  app.setGlobalPrefix('/api/v1', { exclude: ['/feeds/api/v1/price'] });
 
   const appService = app.get(AppService);
   await appService.loadCollectionsInfo();

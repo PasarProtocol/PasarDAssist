@@ -25,7 +25,7 @@ export class AppController {
     return await this.appService.check();
   }
 
-  @Get('/price')
+  @Get('/feeds/api/v1/price')
   async getPrice(): Promise<any> {
     return await this.appService.getPrice();
   }
