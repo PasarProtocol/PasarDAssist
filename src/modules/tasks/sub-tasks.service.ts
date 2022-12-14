@@ -437,10 +437,24 @@ export class SubTasksService {
     const channelEvent = new ChannelEventModel(eventInfo);
     await channelEvent.save();
 
-    await this.dbService.updateFeedsChannel(
-      eventInfo.tokenId,
-      eventInfo.tokenUri,
-      eventInfo.receiptAddr,
-    );
+    await this.updateTokenChannel(eventInfo.tokenId, eventInfo.tokenUri, eventInfo.receiptAddr);
+  }
+
+  async updateTokenChannel(tokenId: string, tokenUri: string, receiptAddr: string) {
+    const result = await this.dbService.updateFeedsChannel(tokenId, tokenUri, receiptAddr);
+
+    if (result.matchedCount === 0) {
+      this.logger.warn(`Token ${tokenId} is not exist yet, put the operation into the queue`);
+      await Sleep(1000);
+      await this.tokenDataQueueLocal.add(
+        'update-token-channel',
+        {
+          tokenId,
+          tokenUri,
+          receiptAddr,
+        },
+        { removeOnComplete: true },
+      );
+    }
   }
 }
