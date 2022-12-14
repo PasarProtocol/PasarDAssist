@@ -312,12 +312,18 @@ export class DbService {
       .deleteMany({ timestamp: { $lt: timestamp } });
   }
 
-  async updateFeedsChannel(tokenId: string, tokenUri: string, receiptAddr: string) {
+  async updateFeedsChannel(
+    tokenId: string,
+    tokenUri: string,
+    receiptAddr: string,
+    channelEntry: string,
+  ) {
     return await this.connection.collection('tokens').updateOne(
       { chain: Chain.ELA, tokenId },
       {
         tokenUri,
         receiptAddr,
+        channelEntry,
         notGetDetail: true,
         retryTimes: 0,
       },

@@ -43,7 +43,9 @@ export class TokenDataConsumer {
   }
 
   @Process('update-token-channel')
-  async updateTokenChannel(job: Job<{ tokenId: string; tokenUri: string; receiptAddr: string }>) {
+  async updateTokenChannel(
+    job: Job<{ tokenId: string; tokenUri: string; receiptAddr: string; channelEntry: string }>,
+  ) {
     this.logger.log(
       `Processing queues job ['update-token-channel'] data: ${JSON.stringify(job.data)}`,
     );
@@ -51,6 +53,7 @@ export class TokenDataConsumer {
       job.data.tokenId,
       job.data.tokenUri,
       job.data.receiptAddr,
+      job.data.channelEntry,
     );
 
     return true;
