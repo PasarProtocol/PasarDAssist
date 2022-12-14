@@ -269,10 +269,10 @@ export class SubTasksService {
         retryTimes: 0,
       };
 
-      await this.dbService.insertToken(tokenInfo);
+      await this.dbService.updateToken(tokenInfo);
     } else {
       if (eventInfo.to !== market) {
-        await this.dbService.updateTokenOwner(chain, contract, tokenId, event.returnValues._to);
+        await this.updateTokenOwner(chain, contract, tokenId, event.returnValues._to);
       }
     }
   }

@@ -136,7 +136,7 @@ export class DbService {
     }
   }
 
-  async insertToken(tokenInfo: {
+  async updateToken(tokenInfo: {
     chain: Chain;
     tokenId: string;
     uniqueKey: string;
@@ -151,7 +151,13 @@ export class DbService {
     notGetDetail: boolean;
     retryTimes: number;
   }) {
-    return await this.connection.collection('tokens').insertOne(tokenInfo);
+    return await this.connection
+      .collection('tokens')
+      .updateOne(
+        { chain: tokenInfo.chain, contract: tokenInfo.contract, tokenId: tokenInfo.tokenId },
+        { $set: tokenInfo },
+        { upsert: true },
+      );
   }
 
   async getLatestNoDetailTokens() {
