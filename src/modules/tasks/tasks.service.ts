@@ -919,21 +919,16 @@ export class TasksService {
     });
 
     if (!this.subTasksService.checkIsBaseCollection(eventInfo.token, chain)) {
-      await this.subTasksService.startupSyncCollection(
-        eventInfo.token,
-        chain,
-        is721,
-        this.pasarContract,
-      );
+      this.subTasksService.startupSyncCollection(eventInfo.token, chain, is721, this.pasarContract);
     }
 
     if (eventInfo.name === 'Feeds Channel Registry') {
-      await this.subTasksService.startupListenChannelEvent(
+      this.subTasksService.startupListenChannelEvent(
         eventInfo.token,
         FeedsChannelEventType.ChannelRegistered,
         0,
       );
-      await this.subTasksService.startupListenChannelEvent(
+      this.subTasksService.startupListenChannelEvent(
         eventInfo.token,
         FeedsChannelEventType.ChannelUpdated,
         0,
