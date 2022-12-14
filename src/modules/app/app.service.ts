@@ -706,13 +706,14 @@ export class AppService {
         break;
     }
 
+    pipeline.push({ $match: match });
+
     const pagination = [
       { $sort: sort },
       { $skip: (dto.pageNum - 1) * dto.pageSize },
       { $limit: dto.pageSize },
     ];
     const unionToken = [
-      { $match: match },
       {
         $lookup: {
           from: 'tokens',
@@ -745,6 +746,8 @@ export class AppService {
       paginationFirst
         ? pipeline.push(...[...pagination, ...unionToken])
         : pipeline.push(...pagination);
+
+      this.logger.warn(JSON.stringify(pipeline));
 
       data = await this.connection
         .collection('orders')
