@@ -321,11 +321,13 @@ export class DbService {
     return await this.connection.collection('tokens').updateOne(
       { chain: Chain.ELA, tokenId },
       {
-        tokenUri,
-        receiptAddr,
-        channelEntry,
-        notGetDetail: true,
-        retryTimes: 0,
+        $set: {
+          tokenUri,
+          receiptAddr,
+          channelEntry,
+          notGetDetail: true,
+          retryTimes: 0,
+        },
       },
     );
   }
