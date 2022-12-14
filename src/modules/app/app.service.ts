@@ -747,8 +747,6 @@ export class AppService {
         ? pipeline.push(...[...pagination, ...unionToken])
         : pipeline.push(...pagination);
 
-      this.logger.warn(JSON.stringify(pipeline));
-
       data = await this.connection
         .collection('orders')
         .aggregate([...pipeline])
