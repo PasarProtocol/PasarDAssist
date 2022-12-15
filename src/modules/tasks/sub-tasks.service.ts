@@ -96,22 +96,24 @@ export class SubTasksService {
   }
 
   async dealWithNewOrder(orderInfo: ContractOrderInfo) {
-    let ipfsUserInfo;
+    let ipfsUserInfo = {} as any;
+
     if (
-      orderInfo.baseToken !==
-      ConfigContract[this.configService.get('NETWORK')][Chain.V1].stickerContract
+      orderInfo.sellerUri.startsWith('pasar:json:') ||
+      orderInfo.sellerUri.startsWith('feeds:json:')
     ) {
       ipfsUserInfo = await this.getInfoByIpfsUri(orderInfo.sellerUri);
       if (ipfsUserInfo && ipfsUserInfo.did) {
         await this.dbService.updateUser(orderInfo.sellerAddr, ipfsUserInfo as ContractUserInfo);
       }
+    } else if (orderInfo.sellerUri.startsWith('did:elastos:')) {
+      ipfsUserInfo = { did: orderInfo.sellerUri };
     }
 
     const OrderInfoModel = getOrderInfoModel(this.connection);
     const orderInfoDoc = new OrderInfoModel({
       ...orderInfo,
       sellerInfo: ipfsUserInfo,
-      // tokenIdHex: BigNumber.from(orderInfo.tokenId).toHexString(),
     });
 
     await orderInfoDoc.save();
