@@ -250,27 +250,8 @@ export class SubTasksService {
     await tokenEvent.save();
 
     if (eventInfo.from === Constants.BURN_ADDRESS) {
-      const contractRPC = new this.web3Service.web3RPC[chain].eth.Contract(
-        is721 ? TOKEN721_ABI : TOKEN1155_ABI,
-        contract,
-      );
-      const method = is721
-        ? contractRPC.methods.tokenURI(tokenId).call
-        : contractRPC.methods.uri(tokenId).call;
-
-      const [tokenUri] = await this.web3Service.web3BatchRequest(
-        [
-          {
-            method: method,
-            params: {},
-          },
-        ],
-        chain,
-      );
-
       const tokenInfo = {
         tokenId,
-        tokenUri,
         tokenSupply: 1,
         tokenOwner: event.returnValues._to,
         tokenIdHex: '0x' + BigInt(tokenId).toString(16),
@@ -280,9 +261,25 @@ export class SubTasksService {
         blockNumber: event.blockNumber,
         createTime: blockInfo.timestamp,
         updateTime: blockInfo.timestamp,
-        notGetDetail: true,
-        retryTimes: 0,
       };
+
+      const contractRPC = new this.web3Service.web3RPC[chain].eth.Contract(
+        is721 ? TOKEN721_ABI : TOKEN1155_ABI,
+        contract,
+      );
+
+      let tokenUri;
+      try {
+        tokenUri = await (is721
+          ? contractRPC.methods.tokenURI(tokenId)
+          : contractRPC.methods.uri(tokenId)
+        ).call();
+
+        Object.assign(tokenInfo, { tokenUri, notGetDetail: true, retryTimes: 0 });
+      } catch (e) {
+        this.logger.warn(e);
+        this.logger.warn(`${tokenId} has been burned, can not get the tokenUri`);
+      }
 
       await this.dbService.updateToken(tokenInfo);
     } else {

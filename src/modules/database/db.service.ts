@@ -141,15 +141,15 @@ export class DbService {
     tokenId: string;
     uniqueKey: string;
     createTime: number;
-    tokenUri: string;
+    tokenUri?: string;
     tokenSupply: number;
     tokenOwner: string;
     tokenIdHex: string;
     contract: string;
     blockNumber: number;
     updateTime: number;
-    notGetDetail: boolean;
-    retryTimes: number;
+    notGetDetail?: boolean;
+    retryTimes?: number;
   }) {
     return await this.connection
       .collection('tokens')
