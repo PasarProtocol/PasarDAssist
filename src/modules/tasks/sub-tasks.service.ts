@@ -218,22 +218,9 @@ export class SubTasksService {
     market: string,
   ) {
     const tokenId = is721 ? event.returnValues._tokenId : event.returnValues._id;
-    const contractRPC = new this.web3Service.web3RPC[chain].eth.Contract(
-      is721 ? TOKEN721_ABI : TOKEN1155_ABI,
-      contract,
-    );
-    const method = is721
-      ? contractRPC.methods.tokenURI(tokenId).call
-      : contractRPC.methods.uri(tokenId).call;
 
-    const [txInfo, blockInfo, tokenUri] = await this.web3Service.web3BatchRequest(
-      [
-        ...this.web3Service.getBaseBatchRequestParam(event, chain),
-        {
-          method: method,
-          params: {},
-        },
-      ],
+    const [txInfo, blockInfo] = await this.web3Service.web3BatchRequest(
+      [...this.web3Service.getBaseBatchRequestParam(event, chain)],
       chain,
     );
 
@@ -256,6 +243,24 @@ export class SubTasksService {
     await tokenEvent.save();
 
     if (eventInfo.from === Constants.BURN_ADDRESS) {
+      const contractRPC = new this.web3Service.web3RPC[chain].eth.Contract(
+        is721 ? TOKEN721_ABI : TOKEN1155_ABI,
+        contract,
+      );
+      const method = is721
+        ? contractRPC.methods.tokenURI(tokenId).call
+        : contractRPC.methods.uri(tokenId).call;
+
+      const [tokenUri] = await this.web3Service.web3BatchRequest(
+        [
+          {
+            method: method,
+            params: {},
+          },
+        ],
+        chain,
+      );
+
       const tokenInfo = {
         tokenId,
         tokenUri,
