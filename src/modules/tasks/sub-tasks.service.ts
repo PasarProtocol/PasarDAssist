@@ -277,8 +277,8 @@ export class SubTasksService {
 
         Object.assign(tokenInfo, { tokenUri, notGetDetail: true, retryTimes: 0 });
       } catch (e) {
-        this.logger.warn(e);
-        this.logger.warn(`${tokenId} has been burned, can not get the tokenUri`);
+        this.logger.error(e);
+        this.logger.error(`${tokenId} has been burned, can not get the tokenUri`);
       }
 
       await this.dbService.updateToken(tokenInfo);
