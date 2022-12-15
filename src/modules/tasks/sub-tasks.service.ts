@@ -28,7 +28,6 @@ import { ConfigContract } from '../../config/config.contract';
 import { getTokenEventModel } from '../common/models/TokenEventModel';
 import { Constants } from '../../constants';
 import { Cache } from 'cache-manager';
-import { BigNumber } from 'ethers';
 import { ChannelRegistryABI } from '../../contracts/ChannelRegistryABI';
 import { getChannelEventModel } from '../common/models/ChannelEventModel';
 
@@ -63,14 +62,18 @@ export class SubTasksService {
   async dealWithNewToken(tokenInfo: ContractTokenInfo, blockNumber: number) {
     const ipfsTokenInfo = (await this.getInfoByIpfsUri(tokenInfo.tokenUri)) as IPFSTokenInfo;
 
-    if (ipfsTokenInfo.version.toString() === '1') {
-      ipfsTokenInfo.data = {
-        image: ipfsTokenInfo.image,
-        kind: ipfsTokenInfo.kind,
-        thumbnail: ipfsTokenInfo.thumbnail,
-        size: ipfsTokenInfo.size,
-        signature: '',
-      };
+    if (ipfsTokenInfo.version !== undefined) {
+      if (ipfsTokenInfo.version.toString() === '1') {
+        ipfsTokenInfo.data = {
+          image: ipfsTokenInfo.image,
+          kind: ipfsTokenInfo.kind,
+          thumbnail: ipfsTokenInfo.thumbnail,
+          size: ipfsTokenInfo.size,
+          signature: '',
+        };
+      }
+    } else {
+      this.logger.warn(JSON.stringify(ipfsTokenInfo));
     }
 
     if (ipfsTokenInfo.creator && ipfsTokenInfo.creator.did) {
@@ -81,7 +84,7 @@ export class SubTasksService {
     await TokenInfoModel.findOneAndUpdate(
       { uniqueKey: tokenInfo.uniqueKey },
       {
-        tokenIdHex: BigNumber.from(tokenInfo.tokenId).toHexString(),
+        tokenIdHex: '0x' + BigInt(tokenInfo.tokenId).toString(16),
         ...tokenInfo,
         ...ipfsTokenInfo,
         tokenOwner: tokenInfo.royaltyOwner,
@@ -109,7 +112,7 @@ export class SubTasksService {
     const orderInfoDoc = new OrderInfoModel({
       ...orderInfo,
       sellerInfo: ipfsUserInfo,
-      tokenIdHex: BigNumber.from(orderInfo.tokenId).toHexString(),
+      // tokenIdHex: BigNumber.from(orderInfo.tokenId).toHexString(),
     });
 
     await orderInfoDoc.save();
@@ -258,7 +261,7 @@ export class SubTasksService {
         tokenUri,
         tokenSupply: 1,
         tokenOwner: event.returnValues._to,
-        tokenIdHex: BigNumber.from(tokenId).toHexString(),
+        tokenIdHex: '0x' + BigInt(tokenId).toString(16),
         chain,
         contract,
         uniqueKey: `${chain}-${contract}-${tokenId}`,
