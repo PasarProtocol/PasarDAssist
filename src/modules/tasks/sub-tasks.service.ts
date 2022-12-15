@@ -153,9 +153,13 @@ export class SubTasksService {
 
   async updateOrder(chain: Chain, orderId: number, params: UpdateOrderParams) {
     if (params.buyerUri) {
-      params.buyerInfo = (await this.getInfoByIpfsUri(params.buyerUri)) as ContractUserInfo;
-      if (params.buyerInfo && params.buyerInfo.did) {
-        await this.dbService.updateUser(params.buyerAddr, params.buyerInfo);
+      if (params.buyerUri.startsWith('pasar:json:') || params.buyerUri.startsWith('feeds:json:')) {
+        params.buyerInfo = (await this.getInfoByIpfsUri(params.buyerUri)) as ContractUserInfo;
+        if (params.buyerInfo && params.buyerInfo) {
+          await this.dbService.updateUser(params.buyerUri, params.buyerInfo);
+        }
+      } else if (params.buyerUri.startsWith('did:elastos:')) {
+        params.buyerInfo = { did: params.buyerUri } as ContractUserInfo;
       }
     }
 
