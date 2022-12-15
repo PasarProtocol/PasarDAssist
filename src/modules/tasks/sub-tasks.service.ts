@@ -98,16 +98,18 @@ export class SubTasksService {
   async dealWithNewOrder(orderInfo: ContractOrderInfo) {
     let ipfsUserInfo = {} as any;
 
-    if (
-      orderInfo.sellerUri.startsWith('pasar:json:') ||
-      orderInfo.sellerUri.startsWith('feeds:json:')
-    ) {
-      ipfsUserInfo = await this.getInfoByIpfsUri(orderInfo.sellerUri);
-      if (ipfsUserInfo && ipfsUserInfo.did) {
-        await this.dbService.updateUser(orderInfo.sellerAddr, ipfsUserInfo as ContractUserInfo);
+    if (orderInfo.sellerUri) {
+      if (
+        orderInfo.sellerUri.startsWith('pasar:json:') ||
+        orderInfo.sellerUri.startsWith('feeds:json:')
+      ) {
+        ipfsUserInfo = await this.getInfoByIpfsUri(orderInfo.sellerUri);
+        if (ipfsUserInfo && ipfsUserInfo.did) {
+          await this.dbService.updateUser(orderInfo.sellerAddr, ipfsUserInfo as ContractUserInfo);
+        }
+      } else if (orderInfo.sellerUri.startsWith('did:elastos:')) {
+        ipfsUserInfo = { did: orderInfo.sellerUri };
       }
-    } else if (orderInfo.sellerUri.startsWith('did:elastos:')) {
-      ipfsUserInfo = { did: orderInfo.sellerUri };
     }
 
     const OrderInfoModel = getOrderInfoModel(this.connection);
