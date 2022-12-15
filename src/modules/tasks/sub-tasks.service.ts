@@ -55,25 +55,24 @@ export class SubTasksService {
       const response = await axios(this.configService.get('IPFS_GATEWAY') + tokenCID);
       return (await response.data) as IPFSTokenInfo;
     } catch (err) {
+      this.logger.error(`Can not get ${ipfsUri}`);
       this.logger.error(err);
     }
+
+    return {} as IPFSTokenInfo;
   }
 
   async dealWithNewToken(tokenInfo: ContractTokenInfo, blockNumber: number) {
     const ipfsTokenInfo = (await this.getInfoByIpfsUri(tokenInfo.tokenUri)) as IPFSTokenInfo;
 
-    if (ipfsTokenInfo.version !== undefined) {
-      if (ipfsTokenInfo.version.toString() === '1') {
-        ipfsTokenInfo.data = {
-          image: ipfsTokenInfo.image,
-          kind: ipfsTokenInfo.kind,
-          thumbnail: ipfsTokenInfo.thumbnail,
-          size: ipfsTokenInfo.size,
-          signature: '',
-        };
-      }
-    } else {
-      this.logger.warn(JSON.stringify(ipfsTokenInfo));
+    if (ipfsTokenInfo.version?.toString() === '1') {
+      ipfsTokenInfo.data = {
+        image: ipfsTokenInfo.image,
+        kind: ipfsTokenInfo.kind,
+        thumbnail: ipfsTokenInfo.thumbnail,
+        size: ipfsTokenInfo.size,
+        signature: '',
+      };
     }
 
     if (ipfsTokenInfo.creator && ipfsTokenInfo.creator.did) {
