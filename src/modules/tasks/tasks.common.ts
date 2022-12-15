@@ -42,7 +42,7 @@ export class TasksCommonService {
           this.logger.log(JSON.stringify(tokenInfo));
 
           const attributes = {};
-          if (tokenInfo.attributes && tokenInfo.attributes.length > 0) {
+          if (tokenInfo && tokenInfo.attributes && tokenInfo.attributes.length > 0) {
             for (const attribute of tokenInfo.attributes) {
               await this.dbService.insertCollectionAttribute(
                 token.chain,
