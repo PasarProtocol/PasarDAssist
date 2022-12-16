@@ -54,15 +54,15 @@ export class TasksCommonService {
 
           const collection = await this.dbService.getCollectionByToken(token.contract, token.chain);
 
-          if (tokenInfo && collection) {
+          if (tokenInfo) {
             const tokenDetail = {
               name: tokenInfo.name,
               description: tokenInfo.description
                 ? tokenInfo.description
                 : tokenInfo.data.description,
               image: tokenInfo.image ? tokenInfo.image : '',
-              royaltyOwner: collection.royaltyOwners[0],
-              royaltyFee: parseInt(collection.royaltyFees[0]),
+              royaltyOwner: collection?.royaltyOwners[0],
+              royaltyFee: collection ? parseInt(collection.royaltyFees[0]) : 0,
               type: tokenInfo.type ? tokenInfo.type : 'image',
               adult: tokenInfo.adult ? tokenInfo.adult : false,
               version: tokenInfo.version ? parseInt(tokenInfo.version) : 2,
