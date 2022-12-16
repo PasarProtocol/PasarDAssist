@@ -54,7 +54,7 @@ export class TasksCommonService {
 
           const collection = await this.dbService.getCollectionByToken(token.contract, token.chain);
 
-          if (tokenInfo) {
+          if (tokenInfo && collection) {
             const tokenDetail = {
               name: tokenInfo.name,
               description: tokenInfo.description
