@@ -6,13 +6,7 @@ import { Connection } from 'mongoose';
 import { getTokenEventModel } from '../common/models/TokenEventModel';
 import { Constants } from '../../constants';
 import { SubTasksService } from './sub-tasks.service';
-import {
-  CollectionEventType,
-  ContractTokenInfo,
-  FeedsChannelEventType,
-  OrderEventType,
-  OrderState,
-} from './interfaces';
+import { CollectionEventType, ContractTokenInfo, OrderEventType, OrderState } from './interfaces';
 import { ConfigService } from '@nestjs/config';
 import { getOrderEventModel } from '../common/models/OrderEventModel';
 import { Sleep } from '../utils/utils.service';
@@ -28,8 +22,8 @@ import { Cache } from 'cache-manager';
 export class TasksService {
   private readonly logger = new Logger('TasksService');
 
-  private readonly step = 5000;
-  private readonly stepInterval = 1000 * 10;
+  private readonly step = 500;
+  private readonly stepInterval = 1000;
   private readonly chain = Chain.ELA;
   private readonly network = this.configService.get<string>('NETWORK');
   private readonly rpc = this.web3Service.web3RPC[this.chain];
@@ -920,19 +914,6 @@ export class TasksService {
 
     if (!this.subTasksService.checkIsBaseCollection(eventInfo.token, chain)) {
       this.subTasksService.startupSyncCollection(eventInfo.token, chain, is721, this.pasarContract);
-    }
-
-    if (eventInfo.name === 'Feeds Channel Registry') {
-      this.subTasksService.startupListenChannelEvent(
-        eventInfo.token,
-        FeedsChannelEventType.ChannelRegistered,
-        0,
-      );
-      this.subTasksService.startupListenChannelEvent(
-        eventInfo.token,
-        FeedsChannelEventType.ChannelUpdated,
-        0,
-      );
     }
 
     await this.subTasksService.updateCachedCollections(chain, eventInfo.token, eventInfo.name);

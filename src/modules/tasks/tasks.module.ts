@@ -12,6 +12,7 @@ import { PasarV1Service } from './tasks.pasarV1';
 import { TasksCommonService } from './tasks.common';
 import { TasksEthereum } from './tasks.ethereum';
 import { TasksFusion } from './tasks.fusion';
+import { TasksChannelRegistry } from './tasks.channel-registry';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { TasksFusion } from './tasks.fusion';
     TasksEthereum,
     TasksFusion,
     PasarV1Service,
+    TasksChannelRegistry,
     TasksCommonService,
     SubTasksService,
     DataCheckService,

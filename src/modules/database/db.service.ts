@@ -312,23 +312,29 @@ export class DbService {
       .deleteMany({ timestamp: { $lt: timestamp } });
   }
 
-  async updateFeedsChannel(
-    tokenId: string,
-    tokenUri: string,
-    receiptAddr: string,
-    channelEntry: string,
-  ) {
+  async updateFeedsChannel(channelInfo: {
+    tokenId: string;
+    tokenUri: string;
+    receiptAddr: string;
+    channelEntry: string;
+  }) {
     return await this.connection.collection('tokens').updateOne(
-      { chain: Chain.ELA, tokenId },
+      { chain: Chain.ELA, tokenId: channelInfo.tokenId },
       {
         $set: {
-          tokenUri,
-          receiptAddr,
-          channelEntry,
+          ...channelInfo,
           notGetDetail: true,
           retryTimes: 0,
         },
       },
     );
+  }
+
+  async newTokenChannel(channelInfo: any) {
+    return await this.connection
+      .collection('tokens')
+      .findOneAndUpdate({ chain: channelInfo.chain, tokenId: channelInfo.tokenId }, channelInfo, {
+        upsert: true,
+      });
   }
 }

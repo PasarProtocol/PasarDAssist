@@ -28,8 +28,6 @@ import { ConfigContract } from '../../config/config.contract';
 import { getTokenEventModel } from '../common/models/TokenEventModel';
 import { Constants } from '../../constants';
 import { Cache } from 'cache-manager';
-import { ChannelRegistryABI } from '../../contracts/ChannelRegistryABI';
-import { getChannelEventModel } from '../common/models/ChannelEventModel';
 
 @Injectable()
 export class SubTasksService {
@@ -197,7 +195,8 @@ export class SubTasksService {
   checkIsBaseCollection(token: string, chain: Chain) {
     return (
       ConfigContract[this.configService.get('NETWORK')][chain].stickerContract === token ||
-      ConfigContract[this.configService.get('NETWORK')][Chain.V1].stickerContract === token
+      ConfigContract[this.configService.get('NETWORK')][Chain.V1].stickerContract === token ||
+      ConfigContract[this.configService.get('NETWORK')][Chain.ELA].channelRegistryContract === token
     );
   }
 
@@ -413,78 +412,22 @@ export class SubTasksService {
     }
   }
 
-  startupListenChannelEvent(token: string, eventType: FeedsChannelEventType, fromBlock: number) {
-    const contractWs = new this.web3Service.web3WS[Chain.ELA].eth.Contract(
-      ChannelRegistryABI as any,
-      token,
-    );
-
-    this.logger.log(`Start sync ${eventType} events from [${fromBlock}] 💪💪💪 `);
-
-    contractWs.events[eventType]({
-      fromBlock,
-    })
-      .on('error', (error) => {
-        this.logger.error(error);
-      })
-      .on('data', async (event) => {
-        await this.dealWithChannelEvents(event, eventType);
-      });
-  }
-
-  async dealWithChannelEvents(event, eventType: FeedsChannelEventType) {
-    const eventInfo = {
-      blockNumber: event.blockNumber,
-      transactionHash: event.transactionHash,
-      tokenId: event.returnValues.tokenId,
-      tokenUri: event.returnValues.tokenURI ?? event.returnValues.newChannelURI,
-      channelEntry: event.returnValues.channelEntry ?? event.returnValues.newChannelEntry,
-      receiptAddr: event.returnValues.receiptAddr,
-      eventType,
-    };
-
-    this.logger.log(`Received ${eventType} ${JSON.stringify(eventInfo)}`);
-
-    const ChannelEventModel = getChannelEventModel(this.connection);
-    const channelEvent = new ChannelEventModel(eventInfo);
-    await channelEvent.save();
-
-    await this.updateTokenChannel(
-      eventInfo.tokenId,
-      eventInfo.tokenUri,
-      eventInfo.receiptAddr,
-      eventInfo.channelEntry,
-    );
-  }
-
-  async updateTokenChannel(
-    tokenId: string,
-    tokenUri: string,
-    receiptAddr: string,
-    channelEntry: string,
-  ) {
-    const result = await this.dbService.updateFeedsChannel(
-      tokenId,
-      tokenUri,
-      receiptAddr,
-      channelEntry,
-    );
+  async updateTokenChannel(channelInfo: {
+    tokenId: string;
+    tokenUri: string;
+    receiptAddr: string;
+    channelEntry: string;
+  }) {
+    const result = await this.dbService.updateFeedsChannel(channelInfo);
 
     if (result.matchedCount === 0) {
       this.logger.warn(
-        `Update Token channel ${tokenId} is not exist yet, put the operation into the queue`,
+        `Update Token channel ${channelInfo.tokenId} is not exist yet, put the operation into the queue`,
       );
       await Sleep(1000);
-      await this.tokenDataQueueLocal.add(
-        'update-token-channel',
-        {
-          tokenId,
-          tokenUri,
-          receiptAddr,
-          channelEntry,
-        },
-        { removeOnComplete: true },
-      );
+      await this.tokenDataQueueLocal.add('update-token-channel', channelInfo, {
+        removeOnComplete: true,
+      });
     }
   }
 }

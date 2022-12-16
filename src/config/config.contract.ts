@@ -10,11 +10,13 @@ export const ConfigContract = {
       stickerContract: '0xF63f820F4a0bC6E966D61A4b20d24916713Ebb95',
       registerContract: '0x3d0AD66765C319c2A1c6330C1d815608543dcc19',
       pasarMiningContract: '0xB27CC87EaF372F78E3Ca4da38b013E154e7247e0',
+      channelRegistryContract: '0xF5c140100F1E8475bc5097FF9D5689d043d9BE12',
 
       pasarContractDeploy: 12698149,
       stickerContractDeploy: 12695430,
       registerContractDeploy: 12698059,
       pasarMiningContractDeploy: 14255847,
+      channelRegistryContractDeploy: 15376251,
 
       ELAToken: '0x0000000000000000000000000000000000000000',
     },
@@ -71,11 +73,13 @@ export const ConfigContract = {
       stickerContract: '0x32496388d7c0CDdbF4e12BDc84D39B9E42ee4CB0',
       registerContract: '0x2b304ffC302b402785294629674A8C2b64cEF897',
       pasarMiningContract: '0xB27CC87EaF372F78E3Ca4da38b013E154e7247e0',
+      channelRegistryContract: '0x38D3fE3C53698fa836Ba0c1e1DD8b1d8584127A7',
 
       pasarContractDeploy: 12311847,
       stickerContractDeploy: 12311834,
       registerContractDeploy: 12311838,
       pasarMiningContractDeploy: 14255847,
+      channelRegistryContractDeploy: 14673711,
 
       ELAToken: '0x0000000000000000000000000000000000000000',
     },
