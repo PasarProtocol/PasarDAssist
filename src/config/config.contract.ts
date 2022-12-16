@@ -3,8 +3,8 @@ import { Chain } from '../modules/utils/enums';
 export const ConfigContract = {
   mainnet: {
     [Chain.ELA]: {
-      wsUrl: 'wss://api.elastos.io/eth-ws',
-      rpcUrl: 'https://api.elastos.io/eth',
+      wsUrl: 'ws://10.0.0.146:20635',
+      rpcUrl: 'http://10.0.0.146:20636',
 
       pasarContract: '0xaeA699E4dA22986eB6fa2d714F5AC737Fe93a998',
       stickerContract: '0xF63f820F4a0bC6E966D61A4b20d24916713Ebb95',
@@ -22,8 +22,8 @@ export const ConfigContract = {
     },
 
     [Chain.V1]: {
-      wsUrl: 'wss://api.elastos.io/eth-ws',
-      rpcUrl: 'https://api.elastos.io/eth',
+      wsUrl: 'ws://10.0.0.146:20635',
+      rpcUrl: 'http://10.0.0.146:20636',
 
       pasarContract: '0x02E8AD0687D583e2F6A7e5b82144025f30e26aA0',
       stickerContract: '0x020c7303664bc88ae92cE3D380BF361E03B78B81',
@@ -36,8 +36,8 @@ export const ConfigContract = {
     },
 
     [Chain.ETH]: {
-      wsUrl: 'wss://mainnet.infura.io/ws/v3/02505ed478e64ee481a74236dc9e91f1',
-      rpcUrl: 'https://mainnet.infura.io/v3/02505ed478e64ee481a74236dc9e91f1',
+      wsUrl: 'wss://mainnet.infura.io/ws/v3/9aa3d95b3bc440fa88ea12eaa4456161',
+      rpcUrl: 'https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
 
       pasarContract: '0x940b857f2D5FA0cf9f0345B43C0e3308cD9E4A62',
       stickerContract: '0x020c7303664bc88ae92cE3D380BF361E03B78B81',
@@ -51,8 +51,8 @@ export const ConfigContract = {
     },
 
     [Chain.FSN]: {
-      wsUrl: 'wss://mainnet.fusionnetwork.io',
-      rpcUrl: 'https://mainnet.fusionnetwork.io',
+      wsUrl: 'ws://10.0.0.146:9001',
+      rpcUrl: 'http://10.0.0.146:9000',
 
       pasarContract: '0xa18279eBDfA5747e79DBFc23fa999b4Eaf2A9780',
       registerContract: '0x020c7303664bc88ae92cE3D380BF361E03B78B81',
@@ -99,8 +99,8 @@ export const ConfigContract = {
     },
 
     [Chain.ETH]: {
-      wsUrl: 'wss://goerli.infura.io/ws/v3/02505ed478e64ee481a74236dc9e91f1',
-      rpcUrl: 'https://goerli.infura.io/v3/02505ed478e64ee481a74236dc9e91f1',
+      wsUrl: 'wss://goerli.infura.io/ws/v3/9aa3d95b3bc440fa88ea12eaa4456161',
+      rpcUrl: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
 
       pasarContract: '0x7d797f3564073FFF8E75D9D5Be57EBC01512b554',
       stickerContract: '0xAB5bB5FcEFc9703814AF68077387BC09Be12190b',
