@@ -331,10 +331,12 @@ export class DbService {
   }
 
   async newTokenChannel(channelInfo: any) {
-    return await this.connection
-      .collection('tokens')
-      .findOneAndUpdate({ chain: channelInfo.chain, tokenId: channelInfo.tokenId }, channelInfo, {
+    return await this.connection.collection('tokens').findOneAndUpdate(
+      { chain: channelInfo.chain, tokenId: channelInfo.tokenId },
+      { $set: channelInfo },
+      {
         upsert: true,
-      });
+      },
+    );
   }
 }
