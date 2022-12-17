@@ -23,8 +23,8 @@ export class TasksCommonService {
   ) {}
 
   private readonly logger = new Logger('TasksCommonService');
-  private readonly step = 20000;
-  private readonly stepInterval = 1000 * 10;
+  private readonly step = 2000;
+  private readonly stepInterval = 2000;
 
   @Cron('*/5 * * * * *')
   async getUserTokenInfo() {
@@ -59,7 +59,7 @@ export class TasksCommonService {
               name: tokenInfo.name,
               description: tokenInfo.description
                 ? tokenInfo.description
-                : tokenInfo.data.description,
+                : tokenInfo.data?.description,
               image: tokenInfo.image ? tokenInfo.image : '',
               royaltyOwner: collection?.royaltyOwners[0],
               royaltyFee: collection ? parseInt(collection.royaltyFees[0]) : 0,
