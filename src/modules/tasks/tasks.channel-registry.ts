@@ -10,7 +10,6 @@ import { Sleep } from '../utils/utils.service';
 import { Chain } from '../utils/enums';
 import { ConfigContract } from '../../config/config.contract';
 import { Timeout } from '@nestjs/schedule';
-import { ChannelRegistryABI } from '../../contracts/ChannelRegistryABI';
 import { getChannelEventModel } from '../common/models/ChannelEventModel';
 import { Constants } from '../../constants';
 
@@ -57,11 +56,6 @@ export class TasksChannelRegistry {
     let syncStartBlock = lastHeight;
 
     if (nowHeight - lastHeight > this.step + 1) {
-      const contractWs = new this.web3Service.web3WS[Chain.ELA].eth.Contract(
-        ChannelRegistryABI as any,
-        this.channelRegistryContract,
-      );
-
       syncStartBlock = nowHeight;
 
       let fromBlock = lastHeight + 1;
@@ -69,7 +63,7 @@ export class TasksChannelRegistry {
       while (fromBlock <= nowHeight) {
         this.logger.log(`Sync ${eventType} events from [${fromBlock}] to [${toBlock}]`);
 
-        contractWs
+        this.channelRegistryContractWS
           .getPastEvents(eventType, {
             fromBlock,
             toBlock,
