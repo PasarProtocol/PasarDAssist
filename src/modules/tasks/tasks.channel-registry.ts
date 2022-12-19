@@ -63,7 +63,7 @@ export class TasksChannelRegistry {
       while (fromBlock <= nowHeight) {
         this.logger.log(`Sync ${eventType} events from [${fromBlock}] to [${toBlock}]`);
 
-        this.channelRegistryContractWS
+        this.channelRegistryContractWS.events
           .getPastEvents(eventType, {
             fromBlock,
             toBlock,
