@@ -151,7 +151,7 @@ export class TasksCommonService {
     }
   }
 
-  @Cron('0 */2 * * * *')
+  @Cron('0 */4 * * * *')
   async getTokenPrice() {
     const cmcKeyStr = this.configService.get('CMC_KEY');
     if (!cmcKeyStr) {
