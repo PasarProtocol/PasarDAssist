@@ -18,8 +18,8 @@ import { Constants } from '../../constants';
 export class TasksChannelRegistry {
   private readonly logger = new Logger('TasksChannelRegistry');
 
-  private readonly step = 5;
-  private readonly stepInterval = 500;
+  private readonly step = 2;
+  private readonly stepInterval = 100;
   private readonly chain = Chain.ELA;
   private readonly rpc = this.web3Service.web3RPC[this.chain];
   private readonly channelRegistryContract =
