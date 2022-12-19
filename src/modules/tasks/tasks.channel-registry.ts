@@ -23,8 +23,7 @@ export class TasksChannelRegistry {
   private readonly rpc = this.web3Service.web3RPC[this.chain];
   private readonly channelRegistryContract =
     ConfigContract[this.configService.get('NETWORK')][this.chain].channelRegistryContract;
-  private readonly channelRegistryContractWS =
-    this.web3Service.channelRegistryContractWS[this.chain];
+  private readonly channelRegistryContractWS = this.web3Service.channelRegistryContractWS;
 
   constructor(
     private subTasksService: SubTasksService,
@@ -63,7 +62,7 @@ export class TasksChannelRegistry {
       while (fromBlock <= nowHeight) {
         this.logger.log(`Sync ${eventType} events from [${fromBlock}] to [${toBlock}]`);
 
-        this.channelRegistryContractWS.events
+        this.channelRegistryContractWS
           .getPastEvents(eventType, {
             fromBlock,
             toBlock,
