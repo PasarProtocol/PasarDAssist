@@ -19,8 +19,8 @@ import { TOKEN721_ABI } from '../../contracts/Token721ABI';
 export class TasksFusion {
   private readonly logger = new Logger('TasksFusion');
 
-  private readonly step = 5000;
-  private readonly stepInterval = 1000 * 10;
+  private readonly step = 500;
+  private readonly stepInterval = 2000;
   private readonly chain = Chain.FSN;
   private readonly rpc = this.web3Service.web3RPC[this.chain];
   private readonly pasarContract =

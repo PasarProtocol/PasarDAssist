@@ -22,8 +22,8 @@ import { Cache } from 'cache-manager';
 export class TasksService {
   private readonly logger = new Logger('TasksService');
 
-  private readonly step = 5000;
-  private readonly stepInterval = 1000 * 10;
+  private readonly step = 500;
+  private readonly stepInterval = 1000;
   private readonly chain = Chain.ELA;
   private readonly network = this.configService.get<string>('NETWORK');
   private readonly rpc = this.web3Service.web3RPC[this.chain];
@@ -913,12 +913,7 @@ export class TasksService {
     });
 
     if (!this.subTasksService.checkIsBaseCollection(eventInfo.token, chain)) {
-      await this.subTasksService.startupSyncCollection(
-        eventInfo.token,
-        chain,
-        is721,
-        this.pasarContract,
-      );
+      this.subTasksService.startupSyncCollection(eventInfo.token, chain, is721, this.pasarContract);
     }
 
     await this.subTasksService.updateCachedCollections(chain, eventInfo.token, eventInfo.name);

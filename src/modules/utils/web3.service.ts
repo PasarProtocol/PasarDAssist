@@ -11,6 +11,7 @@ import { PASAR_V1_ABI } from '../../contracts/PasarV1ABI';
 import { STICKER_V1_ABI } from '../../contracts/StickerV1ABI';
 import { DIA_TOKEN_ABI } from '../../contracts/DIATokenABI';
 import { PASAR_MINING_ABI } from '../../contracts/PasarMiningABI';
+import { ChannelRegistryABI } from '../../contracts/ChannelRegistryABI';
 
 @Injectable()
 export class Web3Service {
@@ -26,6 +27,7 @@ export class Web3Service {
   public pasarMiningContractRPC;
   public pasarMiningContractWS;
   public diaContractRPC;
+  public channelRegistryContractWS;
 
   constructor(private configService: ConfigService) {
     const env = this.configService.get('NETWORK');
@@ -188,6 +190,11 @@ export class Web3Service {
     this.pasarMiningContractWS = new this.web3WS[Chain.ELA].eth.Contract(
       PASAR_MINING_ABI,
       ConfigContract[env][Chain.ELA].pasarMiningContract,
+    );
+
+    this.channelRegistryContractWS = new this.web3WS[Chain.ELA].eth.Contract(
+      ChannelRegistryABI,
+      ConfigContract[env][Chain.ELA].channelRegistryContract,
     );
 
     this.diaContractRPC = new this.web3RPC[Chain.V1].eth.Contract(

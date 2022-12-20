@@ -3,6 +3,7 @@ import {
   ContractOrderInfo,
   ContractTokenInfo,
   ContractUserInfo,
+  FeedsChannelEventType,
   IncomeType,
   IPFSCollectionInfo,
   IPFSTokenInfo,
@@ -27,7 +28,6 @@ import { ConfigContract } from '../../config/config.contract';
 import { getTokenEventModel } from '../common/models/TokenEventModel';
 import { Constants } from '../../constants';
 import { Cache } from 'cache-manager';
-import { BigNumber } from 'ethers';
 
 @Injectable()
 export class SubTasksService {
@@ -53,14 +53,17 @@ export class SubTasksService {
       const response = await axios(this.configService.get('IPFS_GATEWAY') + tokenCID);
       return (await response.data) as IPFSTokenInfo;
     } catch (err) {
+      this.logger.error(`Can not get ${ipfsUri}`);
       this.logger.error(err);
     }
+
+    return {} as IPFSTokenInfo;
   }
 
   async dealWithNewToken(tokenInfo: ContractTokenInfo, blockNumber: number) {
     const ipfsTokenInfo = (await this.getInfoByIpfsUri(tokenInfo.tokenUri)) as IPFSTokenInfo;
 
-    if (ipfsTokenInfo.version.toString() === '1') {
+    if (ipfsTokenInfo.version?.toString() === '1') {
       ipfsTokenInfo.data = {
         image: ipfsTokenInfo.image,
         kind: ipfsTokenInfo.kind,
@@ -78,7 +81,7 @@ export class SubTasksService {
     await TokenInfoModel.findOneAndUpdate(
       { uniqueKey: tokenInfo.uniqueKey },
       {
-        tokenIdHex: BigNumber.from(tokenInfo.tokenId).toHexString(),
+        tokenIdHex: '0x' + BigInt(tokenInfo.tokenId).toString(16),
         ...tokenInfo,
         ...ipfsTokenInfo,
         tokenOwner: tokenInfo.royaltyOwner,
@@ -91,14 +94,19 @@ export class SubTasksService {
   }
 
   async dealWithNewOrder(orderInfo: ContractOrderInfo) {
-    let ipfsUserInfo;
-    if (
-      orderInfo.baseToken !==
-      ConfigContract[this.configService.get('NETWORK')][Chain.V1].stickerContract
-    ) {
-      ipfsUserInfo = await this.getInfoByIpfsUri(orderInfo.sellerUri);
-      if (ipfsUserInfo && ipfsUserInfo.did) {
-        await this.dbService.updateUser(orderInfo.sellerAddr, ipfsUserInfo as ContractUserInfo);
+    let ipfsUserInfo = {} as any;
+
+    if (orderInfo.sellerUri) {
+      if (
+        orderInfo.sellerUri.startsWith('pasar:json:') ||
+        orderInfo.sellerUri.startsWith('feeds:json:')
+      ) {
+        ipfsUserInfo = await this.getInfoByIpfsUri(orderInfo.sellerUri);
+        if (ipfsUserInfo && ipfsUserInfo.did) {
+          await this.dbService.updateUser(orderInfo.sellerAddr, ipfsUserInfo as ContractUserInfo);
+        }
+      } else if (orderInfo.sellerUri.startsWith('did:elastos:')) {
+        ipfsUserInfo = { did: orderInfo.sellerUri };
       }
     }
 
@@ -106,7 +114,6 @@ export class SubTasksService {
     const orderInfoDoc = new OrderInfoModel({
       ...orderInfo,
       sellerInfo: ipfsUserInfo,
-      tokenIdHex: BigNumber.from(orderInfo.tokenId).toHexString(),
     });
 
     await orderInfoDoc.save();
@@ -144,9 +151,13 @@ export class SubTasksService {
 
   async updateOrder(chain: Chain, orderId: number, params: UpdateOrderParams) {
     if (params.buyerUri) {
-      params.buyerInfo = (await this.getInfoByIpfsUri(params.buyerUri)) as ContractUserInfo;
-      if (params.buyerInfo && params.buyerInfo.did) {
-        await this.dbService.updateUser(params.buyerAddr, params.buyerInfo);
+      if (params.buyerUri.startsWith('pasar:json:') || params.buyerUri.startsWith('feeds:json:')) {
+        params.buyerInfo = (await this.getInfoByIpfsUri(params.buyerUri)) as ContractUserInfo;
+        if (params.buyerInfo && params.buyerInfo) {
+          await this.dbService.updateUser(params.buyerUri, params.buyerInfo);
+        }
+      } else if (params.buyerUri.startsWith('did:elastos:')) {
+        params.buyerInfo = { did: params.buyerUri } as ContractUserInfo;
       }
     }
 
@@ -184,7 +195,8 @@ export class SubTasksService {
   checkIsBaseCollection(token: string, chain: Chain) {
     return (
       ConfigContract[this.configService.get('NETWORK')][chain].stickerContract === token ||
-      ConfigContract[this.configService.get('NETWORK')][Chain.V1].stickerContract === token
+      ConfigContract[this.configService.get('NETWORK')][Chain.V1].stickerContract === token ||
+      ConfigContract[this.configService.get('NETWORK')][Chain.ELA].channelRegistryContract === token
     );
   }
 
@@ -212,22 +224,9 @@ export class SubTasksService {
     market: string,
   ) {
     const tokenId = is721 ? event.returnValues._tokenId : event.returnValues._id;
-    const contractRPC = new this.web3Service.web3RPC[chain].eth.Contract(
-      is721 ? TOKEN721_ABI : TOKEN1155_ABI,
-      contract,
-    );
-    const method = is721
-      ? contractRPC.methods.tokenURI(tokenId).call
-      : contractRPC.methods.uri(tokenId).call;
 
-    const [txInfo, blockInfo, tokenUri] = await this.web3Service.web3BatchRequest(
-      [
-        ...this.web3Service.getBaseBatchRequestParam(event, chain),
-        {
-          method: method,
-          params: {},
-        },
-      ],
+    const [txInfo, blockInfo] = await this.web3Service.web3BatchRequest(
+      [...this.web3Service.getBaseBatchRequestParam(event, chain)],
       chain,
     );
 
@@ -252,24 +251,39 @@ export class SubTasksService {
     if (eventInfo.from === Constants.BURN_ADDRESS) {
       const tokenInfo = {
         tokenId,
-        tokenUri,
         tokenSupply: 1,
         tokenOwner: event.returnValues._to,
-        tokenIdHex: BigNumber.from(tokenId).toHexString(),
+        tokenIdHex: '0x' + BigInt(tokenId).toString(16),
         chain,
         contract,
         uniqueKey: `${chain}-${contract}-${tokenId}`,
         blockNumber: event.blockNumber,
         createTime: blockInfo.timestamp,
         updateTime: blockInfo.timestamp,
-        notGetDetail: true,
-        retryTimes: 0,
       };
 
-      await this.dbService.insertToken(tokenInfo);
+      const contractRPC = new this.web3Service.web3RPC[chain].eth.Contract(
+        is721 ? TOKEN721_ABI : TOKEN1155_ABI,
+        contract,
+      );
+
+      let tokenUri;
+      try {
+        tokenUri = await (is721
+          ? contractRPC.methods.tokenURI(tokenId)
+          : contractRPC.methods.uri(tokenId)
+        ).call();
+
+        Object.assign(tokenInfo, { tokenUri, notGetDetail: true, retryTimes: 0 });
+      } catch (e) {
+        this.logger.error(e);
+        this.logger.error(`${tokenId} has been burned, can not get the tokenUri`);
+      }
+
+      await this.dbService.updateToken(tokenInfo);
     } else {
       if (eventInfo.to !== market) {
-        await this.dbService.updateTokenOwner(chain, contract, tokenId, event.returnValues._to);
+        await this.updateTokenOwner(chain, contract, tokenId, event.returnValues._to);
       }
     }
   }
@@ -395,6 +409,25 @@ export class SubTasksService {
         collections[key] = { name };
       }
       await this.cacheManager.set(Constants.CACHE_KEY_COLLECTIONS, JSON.stringify(collections));
+    }
+  }
+
+  async updateTokenChannel(channelInfo: {
+    tokenId: string;
+    tokenUri: string;
+    receiptAddr: string;
+    channelEntry: string;
+  }) {
+    const result = await this.dbService.updateFeedsChannel(channelInfo);
+
+    if (result.matchedCount === 0) {
+      this.logger.warn(
+        `Update Token channel ${channelInfo.tokenId} is not exist yet, put the operation into the queue`,
+      );
+      await Sleep(1000);
+      await this.tokenDataQueueLocal.add('update-token-channel', channelInfo, {
+        removeOnComplete: true,
+      });
     }
   }
 }

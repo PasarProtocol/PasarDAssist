@@ -149,3 +149,9 @@ export enum IncomeType {
   Sale = 1,
   Royalty,
 }
+
+export enum FeedsChannelEventType {
+  ChannelRegistered = 'ChannelRegistered',
+  ChannelUpdated = 'ChannelUpdated',
+  ChannelUnregistered = 'ChannelUnregistered',
+}

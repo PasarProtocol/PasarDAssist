@@ -650,8 +650,8 @@ export class AppService {
 
     let adultOr;
     let keywordOr;
-    if (!dto.adult) {
-      adultOr = [{ 'token.adult': { $exists: false } }, { 'token.adult': false }];
+    if (dto.adult) {
+      adultOr = [{ 'token.adult': { $ne: true } }];
     }
 
     if (dto.keyword !== '' && dto.keyword !== undefined) {
@@ -706,13 +706,14 @@ export class AppService {
         break;
     }
 
+    pipeline.push({ $match: match });
+
     const pagination = [
       { $sort: sort },
       { $skip: (dto.pageNum - 1) * dto.pageSize },
       { $limit: dto.pageSize },
     ];
     const unionToken = [
-      { $match: match },
       {
         $lookup: {
           from: 'tokens',
@@ -1462,7 +1463,7 @@ export class AppService {
     const items = await this.connection
       .collection('tokens')
       .aggregate([
-        { $match: { chain, contract: collection } },
+        { $match: { chain, contract: collection, tokenOwner: { $ne: Constants.BURN_ADDRESS } } },
         { $group: { _id: '$chain', items: { $sum: 1 } } },
       ])
       .toArray();

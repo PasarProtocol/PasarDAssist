@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import {
   CollectionEventType,
   ContractUserInfo,
+  FeedsChannelEventType,
   IncomeType,
   OrderEventType,
   OrderState,
@@ -68,6 +69,21 @@ export class DbService {
     }
   }
 
+  async getChannelEventLastHeight(eventType: FeedsChannelEventType) {
+    const results = await this.connection
+      .collection('channel_events')
+      .find({ eventType })
+      .sort({ blockNumber: -1 })
+      .limit(1)
+      .toArray();
+
+    if (results.length > 0) {
+      return results[0].blockNumber;
+    } else {
+      return 14673711;
+    }
+  }
+
   async updateOrder(chain: Chain, orderId: number, params: UpdateOrderParams) {
     return await this.connection
       .collection('orders')
@@ -120,22 +136,28 @@ export class DbService {
     }
   }
 
-  async insertToken(tokenInfo: {
+  async updateToken(tokenInfo: {
     chain: Chain;
     tokenId: string;
     uniqueKey: string;
     createTime: number;
-    tokenUri: string;
+    tokenUri?: string;
     tokenSupply: number;
     tokenOwner: string;
     tokenIdHex: string;
     contract: string;
     blockNumber: number;
     updateTime: number;
-    notGetDetail: boolean;
-    retryTimes: number;
+    notGetDetail?: boolean;
+    retryTimes?: number;
   }) {
-    return await this.connection.collection('tokens').insertOne(tokenInfo);
+    return await this.connection
+      .collection('tokens')
+      .updateOne(
+        { chain: tokenInfo.chain, contract: tokenInfo.contract, tokenId: tokenInfo.tokenId },
+        { $set: tokenInfo },
+        { upsert: true },
+      );
   }
 
   async getLatestNoDetailTokens() {
@@ -288,5 +310,33 @@ export class DbService {
     return await this.connection
       .collection('tokens_price')
       .deleteMany({ timestamp: { $lt: timestamp } });
+  }
+
+  async updateFeedsChannel(channelInfo: {
+    tokenId: string;
+    tokenUri: string;
+    receiptAddr: string;
+    channelEntry: string;
+  }) {
+    return await this.connection.collection('tokens').updateOne(
+      { chain: Chain.ELA, tokenId: channelInfo.tokenId },
+      {
+        $set: {
+          ...channelInfo,
+          notGetDetail: true,
+          retryTimes: 0,
+        },
+      },
+    );
+  }
+
+  async newTokenChannel(channelInfo: any) {
+    return await this.connection.collection('tokens').findOneAndUpdate(
+      { chain: channelInfo.chain, tokenId: channelInfo.tokenId },
+      { $set: channelInfo },
+      {
+        upsert: true,
+      },
+    );
   }
 }

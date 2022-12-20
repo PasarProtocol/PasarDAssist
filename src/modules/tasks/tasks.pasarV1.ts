@@ -19,8 +19,8 @@ import { Timeout } from '@nestjs/schedule';
 export class PasarV1Service {
   private readonly logger = new Logger('PasarV1Service');
 
-  private readonly step = 5000;
-  private readonly stepInterval = 1000 * 10;
+  private readonly step = 500;
+  private readonly stepInterval = 1000;
   private readonly chain = Chain.V1;
   private readonly rpc: Web3;
   private readonly stickerContract =

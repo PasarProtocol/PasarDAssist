@@ -3,25 +3,27 @@ import { Chain } from '../modules/utils/enums';
 export const ConfigContract = {
   mainnet: {
     [Chain.ELA]: {
-      wsUrl: 'wss://api.elastos.io/eth-ws',
-      rpcUrl: 'https://api.elastos.io/eth',
+      wsUrl: 'ws://10.0.0.146:20635',
+      rpcUrl: 'http://10.0.0.146:20636',
 
       pasarContract: '0xaeA699E4dA22986eB6fa2d714F5AC737Fe93a998',
       stickerContract: '0xF63f820F4a0bC6E966D61A4b20d24916713Ebb95',
       registerContract: '0x3d0AD66765C319c2A1c6330C1d815608543dcc19',
       pasarMiningContract: '0xB27CC87EaF372F78E3Ca4da38b013E154e7247e0',
+      channelRegistryContract: '0xF5c140100F1E8475bc5097FF9D5689d043d9BE12',
 
       pasarContractDeploy: 12698149,
       stickerContractDeploy: 12695430,
       registerContractDeploy: 12698059,
       pasarMiningContractDeploy: 14255847,
+      channelRegistryContractDeploy: 15376251,
 
       ELAToken: '0x0000000000000000000000000000000000000000',
     },
 
     [Chain.V1]: {
-      wsUrl: 'wss://api.elastos.io/eth-ws',
-      rpcUrl: 'https://api.elastos.io/eth',
+      wsUrl: 'ws://10.0.0.146:20635',
+      rpcUrl: 'http://10.0.0.146:20636',
 
       pasarContract: '0x02E8AD0687D583e2F6A7e5b82144025f30e26aA0',
       stickerContract: '0x020c7303664bc88ae92cE3D380BF361E03B78B81',
@@ -34,8 +36,8 @@ export const ConfigContract = {
     },
 
     [Chain.ETH]: {
-      wsUrl: 'wss://mainnet.infura.io/ws/v3/02505ed478e64ee481a74236dc9e91f1',
-      rpcUrl: 'https://mainnet.infura.io/v3/02505ed478e64ee481a74236dc9e91f1',
+      wsUrl: 'wss://mainnet.infura.io/ws/v3/9aa3d95b3bc440fa88ea12eaa4456161',
+      rpcUrl: 'https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
 
       pasarContract: '0x940b857f2D5FA0cf9f0345B43C0e3308cD9E4A62',
       stickerContract: '0x020c7303664bc88ae92cE3D380BF361E03B78B81',
@@ -49,8 +51,8 @@ export const ConfigContract = {
     },
 
     [Chain.FSN]: {
-      wsUrl: 'wss://mainnet.fusionnetwork.io',
-      rpcUrl: 'https://mainnet.fusionnetwork.io',
+      wsUrl: 'ws://10.0.0.146:9001',
+      rpcUrl: 'http://10.0.0.146:9000',
 
       pasarContract: '0xa18279eBDfA5747e79DBFc23fa999b4Eaf2A9780',
       registerContract: '0x020c7303664bc88ae92cE3D380BF361E03B78B81',
@@ -71,11 +73,13 @@ export const ConfigContract = {
       stickerContract: '0x32496388d7c0CDdbF4e12BDc84D39B9E42ee4CB0',
       registerContract: '0x2b304ffC302b402785294629674A8C2b64cEF897',
       pasarMiningContract: '0xB27CC87EaF372F78E3Ca4da38b013E154e7247e0',
+      channelRegistryContract: '0x38D3fE3C53698fa836Ba0c1e1DD8b1d8584127A7',
 
       pasarContractDeploy: 12311847,
       stickerContractDeploy: 12311834,
       registerContractDeploy: 12311838,
       pasarMiningContractDeploy: 14255847,
+      channelRegistryContractDeploy: 14673711,
 
       ELAToken: '0x0000000000000000000000000000000000000000',
     },
@@ -95,8 +99,8 @@ export const ConfigContract = {
     },
 
     [Chain.ETH]: {
-      wsUrl: 'wss://goerli.infura.io/ws/v3/02505ed478e64ee481a74236dc9e91f1',
-      rpcUrl: 'https://goerli.infura.io/v3/02505ed478e64ee481a74236dc9e91f1',
+      wsUrl: 'wss://goerli.infura.io/ws/v3/9aa3d95b3bc440fa88ea12eaa4456161',
+      rpcUrl: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
 
       pasarContract: '0x7d797f3564073FFF8E75D9D5Be57EBC01512b554',
       stickerContract: '0xAB5bB5FcEFc9703814AF68077387BC09Be12190b',

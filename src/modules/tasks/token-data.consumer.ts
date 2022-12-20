@@ -41,4 +41,23 @@ export class TokenDataConsumer {
 
     return true;
   }
+
+  @Process('update-token-channel')
+  async updateTokenChannel(
+    job: Job<{
+      channelInfo: {
+        tokenId: string;
+        tokenUri: string;
+        receiptAddr: string;
+        channelEntry: string;
+      };
+    }>,
+  ) {
+    this.logger.log(
+      `Processing queues job ['update-token-channel'] data: ${JSON.stringify(job.data)}`,
+    );
+    await this.subTasksService.updateTokenChannel(job.data.channelInfo);
+
+    return true;
+  }
 }
