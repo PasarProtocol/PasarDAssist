@@ -1463,7 +1463,7 @@ export class AppService {
     const items = await this.connection
       .collection('tokens')
       .aggregate([
-        { $match: { chain, contract: collection } },
+        { $match: { chain, contract: collection, tokenOwner: { $ne: Constants.BURN_ADDRESS } } },
         { $group: { _id: '$chain', items: { $sum: 1 } } },
       ])
       .toArray();
