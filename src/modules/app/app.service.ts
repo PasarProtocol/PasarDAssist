@@ -2429,7 +2429,7 @@ export class AppService {
       data = await this.connection
         .collection('tokens')
         .find(match)
-        .sort({ createTime: -1 })
+        .sort({ blockNumber: -1 })
         .skip((pageNum - 1) * pageSize)
         .limit(pageSize)
         .toArray();
