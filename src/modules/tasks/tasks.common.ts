@@ -1,16 +1,16 @@
 import { CACHE_MANAGER, Inject, Injectable, Logger } from '@nestjs/common';
-import { Cron, Timeout } from '@nestjs/schedule';
-import { SubTasksService } from './sub-tasks.service';
-import { DbService } from '../database/db.service';
-import { Web3Service } from '../utils/web3.service';
-import { Sleep } from '../utils/utils.service';
-import { TOKEN721_ABI } from '../../contracts/Token721ABI';
-import { TOKEN1155_ABI } from '../../contracts/Token1155ABI';
-import { ConfigTokens } from '../../config/config.tokens';
 import { ConfigService } from '@nestjs/config';
-import { Chain } from '../utils/enums';
+import { Cron, Timeout } from '@nestjs/schedule';
 import { Cache } from 'cache-manager';
 import { ConfigContract } from '../../config/config.contract';
+import { ConfigTokens } from '../../config/config.tokens';
+import { TOKEN1155_ABI } from '../../contracts/Token1155ABI';
+import { TOKEN721_ABI } from '../../contracts/Token721ABI';
+import { DbService } from '../database/db.service';
+import { Chain } from '../utils/enums';
+import { Sleep } from '../utils/utils.service';
+import { Web3Service } from '../utils/web3.service';
+import { SubTasksService } from './sub-tasks.service';
 
 @Injectable()
 export class TasksCommonService {
@@ -171,6 +171,7 @@ export class TasksCommonService {
       MATIC: 3890,
       CRO: 3635,
       KAVA: 4846,
+      TRX: 1958,
     };
     const tokens2 = {
       EVMOS: 19899,
