@@ -172,6 +172,7 @@ export class TasksCommonService {
       CRO: 3635,
       KAVA: 4846,
       TRX: 1958,
+      CELO: 5567,
     };
     const tokens2 = {
       EVMOS: 19899,
@@ -187,7 +188,7 @@ export class TasksCommonService {
     const x = Math.floor(Math.random() * cmcKeys.length);
     const headers = { 'Content-Type': 'application/json', 'X-CMC_PRO_API_KEY': cmcKeys[x] };
     const res = await fetch(
-      'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?limit=110',
+      'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?limit=130',
       { method: 'get', headers },
     );
     const result = await res.json();
