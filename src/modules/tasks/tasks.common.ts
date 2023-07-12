@@ -173,6 +173,7 @@ export class TasksCommonService {
       KAVA: 4846,
       TRX: 1958,
       CELO: 5567,
+      BTT: 16086,
     };
     const tokens2 = {
       EVMOS: 19899,
@@ -180,7 +181,7 @@ export class TasksCommonService {
       ELA: 2492,
       TLOS: 4660,
       FUSE: 5634,
-      HOO: 7543,
+      // HOO: 7543,
       xDAI: 8635,
       IOTX: 2777,
     };
